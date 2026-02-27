@@ -1,0 +1,342 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## Git como un fotógrafo: preparar la foto y tomarla
+
+Este es el módulo más importante del curso. Aquí aprenderás el flujo fundamental de Git que usarás el 90% del tiempo. Si entiendes este módulo, entiendes Git.
+
+Piensa en Git como un **fotógrafo profesional**:
+1. Primero **preparas** a las personas para la foto (staging)
+2. Luego **tomas** la foto (commit)
+3. Esa foto queda guardada en un **álbum** (repositorio)
+
+En términos de Git:
+
+```
+ Carpeta de trabajo     →    Área de staging    →    Repositorio
+  (Working Directory)        (git add)               (git commit)
+  Donde editas tus          Donde preparas           Donde se guardan
+  archivos normalmente      lo que quieres            las "fotos" de
+                            guardar                   tu proyecto
+```
+
+---
+
+### `git init` — Activar los poderes de Git en una carpeta
+
+`git init` le dice a Git: "quiero que vigiles esta carpeta". Crea una carpeta oculta llamada `.git/` donde Git guarda toda su información.
+
+```bash
+# Crear una carpeta para nuestro proyecto
+mkdir mi-receta
+cd mi-receta
+
+# Activar Git en esta carpeta
+git init
+# Initialized empty Git repository in /home/tu-usuario/mi-receta/.git/
+
+# Verificar que se creó la carpeta oculta .git
+ls -la
+# drwxr-xr-x  7 tu-usuario tu-usuario 4096 ene 15 11:00 .git
+```
+
+¡Esa carpeta `.git` es donde vive toda la magia! Mientras exista, Git está vigilando tu proyecto.
+
+<Callout type="warning" title="¡Cuidado con los git init anidados!">
+  Nunca hagas `git init` dentro de una carpeta que ya está dentro de otro repositorio Git. Esto crea problemas muy confusos. Si no estás seguro, haz `git status` primero: si dice "not a git repository", entonces sí puedes hacer `git init`.
+</Callout>
+
+---
+
+### `git status` — El radar (tu comando favorito)
+
+Si solo pudieras aprender UN comando de Git, debería ser este. `git status` te dice exactamente qué está pasando en tu proyecto: qué archivos cambiaste, qué está listo para guardar y qué falta.
+
+Vamos a ver cómo funciona paso a paso:
+
+```bash
+# Justo después de git init, sin archivos:
+git status
+# On branch main
+# No commits yet
+# nothing to commit (create/copy files and use "git add" to track)
+```
+
+Git te dice: "Estás en la rama main, no hay commits todavía, y no hay nada que guardar". Perfecto.
+
+Ahora creemos un archivo:
+
+```bash
+# Crear un archivo
+echo "# Mi primera receta" > receta.txt
+
+git status
+# On branch main
+# No commits yet
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#         receta.txt
+# nothing added to commit but untracked files present
+```
+
+¿Ves que `receta.txt` aparece en rojo como **Untracked** (sin seguimiento)? Git lo ve, pero no lo está vigilando todavía. Es como alguien que está en la habitación pero no está en la foto.
+
+---
+
+### `git add` — Preparar la foto (staging)
+
+`git add` mueve archivos al **área de staging** (zona de preparación). Es como decirle a alguien "ponte aquí para la foto".
+
+```bash
+# Agregar un archivo específico al staging
+git add receta.txt
+
+git status
+# On branch main
+# No commits yet
+# Changes to be committed:
+#   (use "git rm --cached <file>..." to unstage)
+#         new file:   receta.txt
+```
+
+¡Ahora el archivo aparece en **verde** bajo "Changes to be committed"! Está listo para la foto.
+
+Si tienes varios archivos y quieres agregar **todos** de una vez:
+
+```bash
+git add .
+```
+
+El punto (`.`) significa "todo lo que hay en esta carpeta".
+
+<Callout type="tip" title="El hábito más importante">
+  Siempre revisa `git status` **ANTES** y **DESPUÉS** de `git add`. Es como mirar antes y después de cruzar la calle. Te va a ahorrar muchos dolores de cabeza.
+</Callout>
+
+---
+
+### `git diff` — La lupa antes de guardar
+
+`git diff` te muestra exactamente qué cambió en tus archivos, línea por línea. Las líneas con `+` (en verde) son lo que agregaste, y las líneas con `-` (en rojo) son lo que eliminaste.
+
+```bash
+# Primero, modifiquemos nuestro archivo
+echo "Pasta con salsa de tomate" >> receta.txt
+
+# Ver los cambios ANTES de hacer add
+git diff
+# diff --git a/receta.txt b/receta.txt
+# --- a/receta.txt
+# +++ b/receta.txt
+# @@ -1 +1,2 @@
+#  # Mi primera receta
+# +Pasta con salsa de tomate
+```
+
+Ese `+Pasta con salsa de tomate` en verde te dice que esa línea fue agregada.
+
+Si ya hiciste `git add` y quieres ver qué está en el staging:
+
+```bash
+git diff --staged
+```
+
+---
+
+### `git commit -m "mensaje"` — Tomar la foto
+
+`git commit` toma la "foto" de todo lo que está en el staging y la guarda permanentemente en el historial. El `-m` te permite escribir un mensaje que describe qué hiciste.
+
+```bash
+git commit -m "Agrega receta inicial de pasta"
+# [main (root-commit) a1b2c3d] Agrega receta inicial de pasta
+#  1 file changed, 1 insertion(+)
+#  create mode 100644 receta.txt
+```
+
+¡Felicidades, acabas de crear tu primer commit! Git te confirma:
+- La rama donde estás (`main`)
+- Un identificador único (`a1b2c3d` — el tuyo será diferente)
+- Tu mensaje
+- Cuántos archivos cambiaron
+
+<Callout type="tip" title="Buenos mensajes de commit">
+  **Buenos mensajes:** "Agrega formulario de contacto", "Corrige error en el cálculo de precios", "Actualiza estilos del header"
+
+  **Malos mensajes:** "cambios", "fix", "asdfg", "wip", "cosas"
+
+  Un buen mensaje responde a: "¿Qué hice y por qué?" Tu yo del futuro te lo agradecerá.
+</Callout>
+
+---
+
+### `git log` — El álbum de fotos
+
+`git log` te muestra el historial de todos los commits (fotos) que has tomado. Es tu álbum de fotos del proyecto.
+
+```bash
+git log
+# commit a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0 (HEAD -> main)
+# Author: Tu Nombre <tu@correo.com>
+# Date:   Lun Ene 15 11:30:00 2024
+#
+#     Agrega receta inicial de pasta
+```
+
+Para una versión más compacta (muy útil cuando tienes muchos commits):
+
+```bash
+git log --oneline
+# a1b2c3d Agrega receta inicial de pasta
+```
+
+Cada línea es un commit. El código raro del principio (`a1b2c3d`) es el **hash**: un identificador único para ese commit. Es como el número de serie de cada foto.
+
+---
+
+### `.gitignore` — Archivos que Git debe ignorar
+
+No todos los archivos deben ser rastreados por Git. Archivos temporales, contraseñas, configuraciones locales... hay cosas que no quieres en tu repositorio. Para eso existe `.gitignore`.
+
+Crea un archivo llamado `.gitignore` (con el punto al inicio) en la raíz de tu proyecto:
+
+```bash
+# Crear .gitignore
+cat > .gitignore << 'EOF'
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos con contraseñas o datos sensibles
+.env
+*.secret
+
+# Carpetas de dependencias (se regeneran)
+node_modules/
+
+# Archivos temporales
+*.tmp
+*.log
+EOF
+
+git add .gitignore
+git commit -m "Agrega .gitignore"
+```
+
+Cada línea es un patrón. Los archivos que coincidan serán **invisibles** para Git: no aparecerán en `git status` ni se subirán a GitHub.
+
+<Callout type="tip" title="¿Cuándo crear el .gitignore?">
+  Idealmente al inicio de tu proyecto, como uno de los primeros archivos. Así evitas subir accidentalmente archivos que no deberían estar en el repositorio. En los ejercicios finales lo practicarás.
+</Callout>
+
+---
+
+### Ejemplo práctico completo
+
+Hagamos un ejercicio guiado de principio a fin. Escribe cada comando y observa el resultado:
+
+```bash
+# 1. Crear y entrar al proyecto
+mkdir mi-receta && cd mi-receta
+
+# 2. Activar Git
+git init
+
+# 3. Crear el primer archivo
+echo "# Receta de Pasta" > receta.txt
+
+# 4. Ver el estado (archivo en rojo, sin seguimiento)
+git status
+
+# 5. Preparar el archivo para la foto
+git add receta.txt
+
+# 6. Ver el estado (archivo en verde, listo)
+git status
+
+# 7. Tomar la foto (hacer commit)
+git commit -m "Agrega receta inicial de pasta"
+
+# 8. Agregar más contenido
+echo "" >> receta.txt
+echo "## Ingredientes" >> receta.txt
+echo "- 500g de pasta" >> receta.txt
+echo "- 1 lata de tomate" >> receta.txt
+echo "- Sal y pimienta" >> receta.txt
+
+# 9. Ver qué cambió
+git diff
+
+# 10. Preparar y tomar otra foto
+git add receta.txt
+git commit -m "Agrega lista de ingredientes"
+
+# 11. Ver el álbum de fotos
+git log --oneline
+# b2c3d4e Agrega lista de ingredientes
+# a1b2c3d Agrega receta inicial de pasta
+```
+
+¡Acabas de crear un proyecto con dos commits! Tienes dos "fotos" guardadas de tu proyecto. Podrías volver a cualquiera de ellas en cualquier momento (lo veremos en el módulo siguiente).
+
+---
+
+### Tabla resumen
+
+<CommandTable commands={[
+  { command: "git init", description: "Activar Git en la carpeta actual" },
+  { command: "git status", description: "Ver el estado de tus archivos (¡úsalo siempre!)" },
+  { command: "git add archivo", description: "Preparar un archivo para el commit" },
+  { command: "git add .", description: "Preparar TODOS los archivos modificados" },
+  { command: "git diff", description: "Ver cambios que aún no están en staging" },
+  { command: "git diff --staged", description: "Ver cambios que ya están en staging" },
+  { command: "git commit -m \"mensaje\"", description: "Guardar una \"foto\" del proyecto" },
+  { command: "git log", description: "Ver historial completo de commits" },
+  { command: "git log --oneline", description: "Ver historial compacto de commits" },
+]} />
+
+---
+
+### Ejercicios del módulo
+
+**Ejercicio 1:** Crea una carpeta `practica-git`, inicialízala con `git init` y verifica con `ls -la` que existe la carpeta `.git`.
+
+```bash
+mkdir practica-git
+cd practica-git
+git init
+ls -la
+# ¿Ves la carpeta .git? ¡Git está activado!
+```
+
+**Ejercicio 2:** Crea un archivo `notas.txt` y escribe algo dentro:
+
+```bash
+echo "Hola Git, este es mi primer archivo" > notas.txt
+```
+
+**Ejercicio 3:** Usa `git status`. ¿De qué color aparece el archivo? (Debería aparecer en rojo como "Untracked").
+
+**Ejercicio 4:** Haz `git add notas.txt` y luego `git status` otra vez. ¿Cambió el color? (Ahora debería estar en verde).
+
+**Ejercicio 5:** Haz tu primer commit con un mensaje descriptivo:
+
+```bash
+git commit -m "Agrega archivo de notas inicial"
+```
+
+**Ejercicio 6:** Modifica el archivo, usa `git diff` para ver los cambios, luego haz add y commit:
+
+```bash
+echo "Hoy aprendí git add y git commit" >> notas.txt
+git diff
+# Deberías ver la línea nueva con un + en verde
+git add notas.txt
+git commit -m "Agrega nota sobre lo aprendido hoy"
+git log --oneline
+# Deberías ver 2 commits
+```
+
+<Callout type="info" title="¡Ya sabes lo fundamental!">
+  El flujo `git status` → `git add` → `git commit` es lo que usarás el 90% del tiempo. Si dominas esto, dominas lo esencial de Git. Lo demás es construir sobre esta base. ¡No te preocupes si necesitas repetir estos ejercicios varias veces!
+</Callout>

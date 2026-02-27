@@ -1,0 +1,259 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## Trabajar en equipo como una cocina profesional
+
+En una cocina profesional, cada cocinero trabaja en su estación. Nadie toca directamente el plato final sin que el chef lo revise primero. En desarrollo de software, funciona igual: nadie toca `main` directamente. Todo pasa por un proceso de revisión.
+
+Este módulo te enseña el **GitHub Flow**, el flujo de trabajo que usan la mayoría de equipos profesionales.
+
+---
+
+### ¿Por qué no trabajar directamente en `main`?
+
+Imagina que 5 personas pushen cambios directamente a `main` al mismo tiempo. Sería un caos:
+- Nadie sabe qué cambió quién
+- Si algo se rompe, no sabes quién lo rompió
+- No hay revisión de calidad
+
+Por eso existe el flujo con **Pull Requests** (PR): cada cambio pasa por una revisión antes de llegar a `main`.
+
+---
+
+### El flujo GitHub Flow
+
+Este es el proceso completo que seguirás en tu trabajo:
+
+1. **Crear una rama** para tu tarea
+2. **Trabajar** y hacer commits en esa rama
+3. **Subir la rama** a GitHub
+4. **Crear un Pull Request** (pedir revisión)
+5. **Revisión** y aprobación por parte del equipo
+6. **Merge** en GitHub (el código entra a `main`)
+7. **Actualizar** tu copia local
+
+Veamos cada paso en detalle.
+
+---
+
+### Paso 1-2: Crear rama y trabajar
+
+Esto ya lo sabes del Módulo 5:
+
+```bash
+# Crear rama para tu tarea
+git switch -c feature/mi-cambio
+
+# Hacer tu trabajo
+echo "Nueva funcionalidad" > feature.txt
+git add feature.txt
+git commit -m "Agrega nueva funcionalidad"
+
+# Puedes hacer más commits
+echo "Más detalles" >> feature.txt
+git add feature.txt
+git commit -m "Agrega más detalles a la funcionalidad"
+```
+
+---
+
+### Paso 3: Subir la rama a GitHub
+
+Ahora que tu rama tiene commits, la subes a GitHub:
+
+```bash
+git push -u origin feature/mi-cambio
+# Enumerating objects: 4, done.
+# ...
+# To https://github.com/tu-usuario/mi-proyecto.git
+#  * [new branch]      feature/mi-cambio -> feature/mi-cambio
+```
+
+Ahora la rama existe tanto en tu computador como en GitHub.
+
+---
+
+### Paso 4: Crear un Pull Request (PR)
+
+Un Pull Request es una **solicitud formal** para que tu código entre a `main`. Es como decir: "Terminé mi parte, ¿pueden revisarla antes de juntarla con el proyecto principal?"
+
+**Cómo crear un PR desde GitHub:**
+
+1. Ve a tu repositorio en GitHub
+2. Verás un banner amarillo que dice **"Compare & pull request"** — haz clic ahí
+3. (Si no aparece el banner, ve a la pestaña "Pull requests" → "New pull request")
+4. **Título**: Escribe un resumen corto de lo que hiciste (ejemplo: "Agrega nueva funcionalidad de saludo")
+5. **Descripción**: Explica con más detalle:
+   - **Qué** cambiaste
+   - **Por qué** lo cambiaste
+   - Cualquier nota para los revisores
+6. Haz clic en **"Create pull request"**
+
+<Callout type="tip" title="Un buen Pull Request describe QUÉ y POR QUÉ">
+  **Buen PR:** "Agrega formulario de contacto con validación de email. Se necesitaba porque los usuarios reportaban que no podían comunicarse con soporte."
+
+  **Mal PR:** "Cambios", "Actualizaciones", "Fix"
+</Callout>
+
+---
+
+### Paso 5: Code Review (revisión de código)
+
+Los Pull Requests permiten que otros miembros del equipo revisen tu código antes de aceptarlo:
+
+- **Comentarios línea por línea**: Pueden sugerir mejoras en líneas específicas
+- **Aprobar**: Si todo está bien, aprueban el PR
+- **Pedir cambios**: Si hay algo que mejorar, te lo piden
+
+Si te piden cambios, simplemente haz más commits en la misma rama y sube:
+
+```bash
+# Hacer los cambios pedidos
+echo "Cambio solicitado en revisión" >> feature.txt
+git add feature.txt
+git commit -m "Aplica cambios de la revisión de código"
+git push
+```
+
+El PR se actualiza automáticamente con los nuevos commits.
+
+---
+
+### Paso 6: Merge en GitHub
+
+Una vez que el PR está aprobado, es hora del **merge**. En GitHub verás un botón verde grande:
+
+- **"Merge pull request"**: Haz clic aquí
+- **"Confirm merge"**: Confirma
+
+GitHub te dará tres opciones de merge:
+1. **Create a merge commit** (recomendado para principiantes): crea un commit de merge que une todo
+2. **Squash and merge**: combina todos tus commits en uno solo
+3. **Rebase and merge**: reescribe la historia (más avanzado)
+
+Para empezar, usa **"Create a merge commit"**. Es la más simple y mantiene toda la historia.
+
+Después del merge, GitHub te dará la opción de borrar la rama remota. ¡Hazlo! Ya cumplió su propósito.
+
+---
+
+### Paso 7: Actualizar tu copia local
+
+Después de que el PR se mergea en GitHub, tu copia local de `main` está desactualizada. Necesitas traer los cambios:
+
+```bash
+# Volver a main
+git switch main
+
+# Traer los cambios de GitHub
+git pull
+# Verás todos los cambios del merge
+
+# Borrar la rama local (ya fue mergeada)
+git branch -d feature/mi-cambio
+# Deleted branch feature/mi-cambio
+```
+
+¡Listo! Tu copia local está actualizada y la rama fue limpiada.
+
+---
+
+### Flujo completo de ejemplo
+
+Veamos todo el flujo de principio a fin, como lo harías en tu día a día:
+
+```bash
+# 1. Asegúrate de estar en main y actualizado
+git switch main
+git pull
+
+# 2. Crear rama para tu tarea
+git switch -c feature/agregar-footer
+
+# 3. Trabajar
+echo "<footer>© 2024 Mi Proyecto</footer>" > footer.html
+git add footer.html
+git commit -m "Agrega footer con copyright"
+
+# 4. Subir la rama a GitHub
+git push -u origin feature/agregar-footer
+
+# 5. Ir a GitHub → crear Pull Request
+#    (desde el navegador)
+
+# 6. Esperar revisión y aprobación
+#    (si te piden cambios, haz commits y push)
+
+# 7. Merge desde GitHub (botón verde)
+#    (borrar rama remota cuando GitHub lo ofrezca)
+
+# 8. Actualizar local
+git switch main
+git pull
+git branch -d feature/agregar-footer
+```
+
+<Callout type="info" title="Resumen del flujo profesional">
+
+| Paso | Dónde | Comando / Acción |
+|------|-------|-----------------|
+| Crear rama | Terminal | `git switch -c feature/nombre` |
+| Trabajar | Terminal | `git add` + `git commit` (repetir) |
+| Subir rama | Terminal | `git push -u origin feature/nombre` |
+| Crear PR | GitHub web | Botón "Compare & pull request" |
+| Revisión | GitHub web | Comentarios, aprobación |
+| Merge | GitHub web | Botón verde "Merge pull request" |
+| Actualizar local | Terminal | `git switch main` + `git pull` |
+| Limpieza | Terminal | `git branch -d feature/nombre` |
+
+</Callout>
+
+---
+
+### Tabla resumen de comandos
+
+<CommandTable commands={[
+  { command: "git switch -c feature/nombre", description: "Crear rama para tu tarea" },
+  { command: "git push -u origin feature/nombre", description: "Subir tu rama a GitHub" },
+  { command: "git push", description: "Subir nuevos commits (después del -u)" },
+  { command: "git switch main", description: "Volver a la rama principal" },
+  { command: "git pull", description: "Actualizar main con los cambios de GitHub" },
+  { command: "git branch -d feature/nombre", description: "Borrar rama local después del merge" },
+]} />
+
+---
+
+### Ejercicios del módulo
+
+**Ejercicio 1:** Asegúrate de tener un repo conectado a GitHub. Crea una rama `feature/mi-cambio` y haz un commit:
+
+```bash
+git switch -c feature/mi-cambio
+echo "Este es un cambio de prueba" > cambio.txt
+git add cambio.txt
+git commit -m "Agrega archivo de prueba para PR"
+```
+
+**Ejercicio 2:** Sube la rama a GitHub:
+
+```bash
+git push -u origin feature/mi-cambio
+```
+
+**Ejercicio 3:** Ve a tu repositorio en GitHub y crea un Pull Request. Escribe un título descriptivo y una descripción de lo que hiciste.
+
+**Ejercicio 4:** Mergea el PR desde GitHub (botón verde "Merge pull request" → "Confirm merge"). Si GitHub te ofrece borrar la rama, hazlo.
+
+**Ejercicio 5:** Vuelve a tu terminal y actualiza tu copia local:
+
+```bash
+git switch main
+git pull
+git branch -d feature/mi-cambio
+```
+
+Verifica con `ls` que el archivo `cambio.txt` ahora está en main, y con `git branch` que la rama fue borrada.
+
+<Callout type="tip" title="¡Felicidades, ya conoces el flujo profesional!">
+  Este flujo (rama → commits → push → PR → review → merge → pull) es exactamente lo que usan equipos de desarrollo en todo el mundo. Practícalo varias veces hasta que se sienta natural. En los ejercicios finales podrás practicar un flujo completo de colaboración simulada.
+</Callout>

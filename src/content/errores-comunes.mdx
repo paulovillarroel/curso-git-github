@@ -1,0 +1,326 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## Todos metemos la pata. Git está preparado para eso.
+
+No importa cuánta experiencia tengas: tarde o temprano vas a cometer un error con Git. Un push que no debías, un commit en la rama equivocada, un mensaje con un typo vergonzoso... le pasa a todo el mundo.
+
+Esta sección es tu **botiquín de primeros auxilios**. Guárdala en favoritos. Vuelve aquí cada vez que algo salga mal. Está organizada por el error que cometiste, con la solución paso a paso.
+
+<Callout type="tip" title="Regla de oro antes de cualquier arreglo">
+  Siempre ejecuta `git status` y `git log --oneline` antes de intentar arreglar algo. Necesitas entender dónde estás parado antes de actuar.
+</Callout>
+
+---
+
+### "Me equivoqué en el nombre de la rama"
+
+Con las prisas es facilísimo escribir mal el nombre de una rama. No necesitas borrarla y crearla de nuevo, simplemente renómbrala:
+
+```bash
+# Creaste la rama con un typo
+git switch -c feature/logni
+# ¡Ups! Era "login", no "logni"
+
+# Renombrar la rama (estando en ella)
+git branch -m feature/logni feature/login
+# Listo, la rama ahora se llama feature/login
+```
+
+La flag `-m` viene de "move" (mover/renombrar).
+
+**¿Y si ya habías hecho push de la rama con el nombre mal escrito?**
+
+No pasa nada. Asegúrate de tener todos los cambios en local, renombra la rama y luego:
+
+```bash
+# Renombrar en local
+git branch -m feature/logni feature/login
+
+# Borrar la rama vieja del remoto
+git push origin --delete feature/logni
+
+# Subir la rama con el nombre correcto
+git push -u origin feature/login
+```
+
+---
+
+### "Hice push y me da error (rejected)"
+
+Este es probablemente el error más común para principiantes. Intentas hacer `git push` y Git te rechaza:
+
+```bash
+git push origin main
+# ! [rejected] main -> main (non-fast-forward)
+# error: failed to push some refs to 'github.com:tu-usuario/tu-repo.git'
+# hint: Updates were rejected because the tip of your current branch is behind
+# hint: its remote counterpart. Integrate the remote changes (e.g.
+# hint: 'git pull ...') before pushing again.
+```
+
+**¿Qué pasó?** Tu versión local de `main` está "atrás" de la versión en GitHub. Alguien (o tú desde otra máquina) subió cambios que tú no tienes todavía.
+
+**Solución:**
+
+```bash
+# Traer los cambios remotos y fusionarlos con los tuyos
+git pull origin main
+
+# Si no hay conflictos, ahora sí puedes hacer push
+git push origin main
+```
+
+Si al hacer pull hay conflictos, resuélvelos como aprendiste en el Módulo 5 (editar el archivo, quitar los marcadores `<<<<<<<`, `=======`, `>>>>>>>`, hacer add y commit), y luego haz push.
+
+<Callout type="tip" title="Prevención">
+  Acostúmbrate a hacer `git pull` **antes** de empezar a trabajar cada día. Así siempre partes con la versión más actualizada y reduces conflictos.
+</Callout>
+
+---
+
+### "Hice commits en main pero debían ir a otra rama"
+
+A todos nos ha pasado. Te pusiste a trabajar directamente en `main` sin crear una rama. Tranquilo, tiene solución y no pierdes nada.
+
+**Caso 1: La rama todavía no existe**
+
+Imagina que hiciste 3 commits en `main` que debían ir a una rama nueva:
+
+```bash
+# Verificar que estás en main
+git branch
+# * main
+
+# Crear la nueva rama (que tendrá todos los commits actuales de main)
+git branch feature/mis-cambios
+# OJO: git branch SIN -c, solo crea la rama, NO te mueve a ella
+
+# Mover main 3 commits hacia atrás
+git reset --keep HEAD~3
+
+# Ahora cambiar a la nueva rama (que tiene los 3 commits)
+git switch feature/mis-cambios
+# ¡Tus commits están aquí, y main está limpio!
+```
+
+`--keep` es como un punto medio entre `--soft` y `--hard`: mueve la rama hacia atrás (deshace los commits) pero **conserva los cambios en tus archivos** si no causan conflictos. Es más seguro que `--hard` porque no destruye tu trabajo.
+
+**Caso 2: La rama ya existía**
+
+Si los commits debían ir a una rama que ya existía:
+
+```bash
+# Ir a la rama que debía recibir los commits
+git switch feature/mis-cambios
+
+# Traer los commits de main
+git merge main
+
+# Volver a main y limpiarla
+git switch main
+git reset --keep HEAD~3
+```
+
+<Callout type="warning" title="Solo si NO hiciste push">
+  Esta solución funciona si los commits todavía no fueron subidos a GitHub. Si ya hiciste push a `main`, la situación es más compleja. En ese caso, es mejor usar `git revert` para deshacer los commits en main y luego hacer cherry-pick a la rama correcta.
+</Callout>
+
+---
+
+### "Quiero deshacer el último commit (pero conservar los archivos)"
+
+Hiciste un commit pero te arrepentiste. Quizás el mensaje estaba mal, o te faltó agregar un archivo.
+
+```bash
+# Deshacer el último commit, archivos quedan en staging (listos para commit)
+git reset --soft HEAD~1
+
+# Verificar
+git status
+# Tus archivos siguen ahí, en verde, listos para un nuevo commit
+```
+
+Ahora puedes:
+- Corregir el mensaje: `git commit -m "Mensaje correcto"`
+- Agregar un archivo olvidado: `git add archivo-olvidado.txt` y luego `git commit -m "..."`
+- Hacer más cambios antes de commitear de nuevo
+
+---
+
+### "Quiero deshacer cambios en un archivo que todavía no commitee"
+
+Estás editando un archivo y de repente todo es un desastre. Quieres volver a como estaba en el último commit.
+
+**Si el archivo NO está en staging (no hiciste `git add`):**
+
+```bash
+# Restaurar un archivo al estado del último commit
+git restore archivo.txt
+```
+
+(Nota: en tutoriales antiguos verás `git checkout -- archivo.txt`. Hace lo mismo, pero `git restore` es la forma moderna y más clara.)
+
+**Si el archivo YA está en staging (hiciste `git add`):**
+
+```bash
+# Primero sacarlo del staging
+git restore --staged archivo.txt
+
+# Luego restaurar el contenido
+git restore archivo.txt
+```
+
+<Callout type="warning" title="Esto borra tus cambios">
+  `git restore` descarta los cambios que hiciste en el archivo. Si no hiciste commit de esos cambios, se pierden. Asegúrate de que realmente quieres descartarlos.
+</Callout>
+
+---
+
+### "Hice git add de un archivo que no debía"
+
+Agregaste un archivo al staging por error (quizás un `.env` con contraseñas o un archivo temporal):
+
+```bash
+# Sacar un archivo del staging (sin borrarlo)
+git restore --staged archivo-secreto.env
+
+# Verificar
+git status
+# El archivo vuelve a "Untracked" o "Modified", pero NO se borra del disco
+```
+
+Si ya hiciste commit de ese archivo y quieres sacarlo del seguimiento de Git sin borrarlo del disco:
+
+```bash
+# Dejar de rastrear el archivo (sin borrarlo)
+git rm --cached archivo-secreto.env
+
+# Agregarlo al .gitignore para que no vuelva a pasar
+echo "archivo-secreto.env" >> .gitignore
+
+# Hacer commit del cambio
+git add .gitignore
+git commit -m "Deja de rastrear archivo secreto y lo agrega a .gitignore"
+```
+
+---
+
+### "Me quedé atrapado en Vim"
+
+Es un clásico. Git abrió un editor de texto raro lleno de tildes (`~`) y no puedes salir.
+
+**Eso es Vim**, un editor de texto en terminal. Git lo abre cuando necesita que escribas un mensaje (por ejemplo, durante un merge o un revert sin `-m`).
+
+**Para escapar:**
+
+```bash
+# Presiona estas teclas en orden:
+# 1. Esc (para asegurarte de estar en modo normal)
+# 2. Escribe :q! (dos puntos, q, exclamación)
+# 3. Presiona Enter
+```
+
+`:q!` significa "salir sin guardar". Si quieres guardar el mensaje y salir: `:wq` (write + quit).
+
+**Para que no vuelva a pasar**, configura VS Code como editor (si no lo hiciste en el Módulo 2):
+
+```bash
+git config --global core.editor "code --wait"
+```
+
+---
+
+### "Error en macOS: xcrun: error: invalid active developer path"
+
+Este error aparece frecuentemente después de actualizar macOS:
+
+```bash
+git status
+# xcrun: error: invalid active developer path
+# (/Library/Developer/CommandLineTools),
+# missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun
+```
+
+**Solución:**
+
+```bash
+xcode-select --install
+```
+
+Te aparecerá una ventana pidiendo instalar las herramientas de desarrollo. Acéptala y espera a que termine (puede tardar unos minutos).
+
+Si sigue sin funcionar después de instalar:
+
+1. Reinicia tu Mac
+2. Si persiste: `sudo xcode-select --reset`
+3. Último recurso: descarga manualmente las Command Line Tools desde [developer.apple.com](https://developer.apple.com/download/more/)
+
+---
+
+### "Hice merge y se hizo un desastre"
+
+Si acabas de hacer un merge y todo salió mal (archivos rotos, conflictos por todos lados), puedes **abortar el merge** y volver al estado anterior:
+
+```bash
+# Si el merge todavía no se completó (estás en medio de conflictos)
+git merge --abort
+# Vuelves al estado exacto de antes del merge
+
+# Si ya completaste el merge (hiciste commit)
+git revert -m 1 HEAD
+# -m 1 le dice a Git "quiero quedarme con el estado de la rama principal (main)"
+# Crea un nuevo commit que deshace el merge
+```
+
+`git merge --abort` es tu botón de pánico. Úsalo sin miedo, es completamente seguro.
+
+---
+
+### "Quiero ver qué tenía un archivo en un commit anterior"
+
+A veces no quieres viajar al pasado completo, solo quieres espiar cómo era UN archivo en un momento específico:
+
+```bash
+# Ver el contenido de un archivo en un commit específico
+git show abc1234:ruta/al/archivo.txt
+
+# Ver cómo era el archivo hace 3 commits
+git show HEAD~3:ruta/al/archivo.txt
+```
+
+Esto solo **muestra** el contenido en la terminal, no modifica nada.
+
+Si quieres **recuperar** esa versión del archivo:
+
+```bash
+# Restaurar un archivo a como era en un commit específico
+git restore --source=abc1234 ruta/al/archivo.txt
+
+# Ahora el archivo en tu carpeta tiene el contenido antiguo
+# Puedes hacer add y commit si quieres conservarlo
+```
+
+---
+
+### Tabla resumen de emergencias
+
+<CommandTable commands={[
+  { command: "git branch -m nombre-viejo nombre-nuevo", description: "Renombrar una rama" },
+  { command: "git pull origin main", description: "Arreglar error de push rejected" },
+  { command: "git reset --soft HEAD~1", description: "Deshacer último commit (archivos quedan en staging)" },
+  { command: "git reset --keep HEAD~3", description: "Mover rama N commits atrás (conservando archivos)" },
+  { command: "git restore archivo.txt", description: "Descartar cambios no commiteados en un archivo" },
+  { command: "git restore --staged archivo.txt", description: "Sacar un archivo del staging" },
+  { command: "git rm --cached archivo.txt", description: "Dejar de rastrear un archivo (sin borrarlo)" },
+  { command: "git merge --abort", description: "Cancelar un merge en progreso" },
+  { command: "git show HEAD~3:archivo.txt", description: "Ver cómo era un archivo en el pasado" },
+  { command: "git restore --source=hash archivo.txt", description: "Recuperar versión antigua de un archivo" },
+  { command: "Esc → :q! → Enter", description: "Escapar de Vim" },
+]} />
+
+<Callout type="info" title="Recuerda: Git está de tu lado">
+  Git fue diseñado para que puedas equivocarte. Casi todo tiene solución, y los pocos comandos realmente destructivos (`--hard`, `--force`) siempre requieren que tú explícitamente los pidas. Si no usas esas flags, es muy difícil perder trabajo de verdad.
+
+  Cuando algo salga mal, respira, haz `git status`, y busca tu error en esta lista. Vas a estar bien.
+</Callout>

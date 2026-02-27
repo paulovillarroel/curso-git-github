@@ -1,0 +1,241 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## Presentarte ante Git, como el primer día de clases
+
+Antes de usar Git, necesitas entender **qué es**, **por qué existe** y **cómo piensa**. Después lo configuraremos con tu identidad para que puedas empezar a usarlo.
+
+---
+
+### El problema que Git resuelve
+
+Imagina que estás escribiendo un informe importante. Llevas horas trabajando y haces un cambio que rompe todo. ¿Qué haces? Probablemente piensas "ojalá pudiera volver a la versión de hace 5 minutos".
+
+Ahora imagina algo peor: trabajas con 3 compañeros en el mismo proyecto. Cada uno tiene una copia del código en su computador. Alguien modifica un archivo, otro modifica el mismo archivo, un tercero borra algo sin querer. ¿Cómo juntan todo sin volverse locos? ¿Cómo saben quién cambió qué, cuándo y por qué?
+
+Antes de Git, la gente resolvía esto de formas... creativas:
+
+```
+mi-proyecto-final.zip
+mi-proyecto-final-v2.zip
+mi-proyecto-final-DEFINITIVO.zip
+mi-proyecto-final-DEFINITIVO-ahora-si.zip
+mi-proyecto-final-NO-TOCAR.zip
+```
+
+¿Te suena familiar? Este sistema "funciona" para una persona con un documento pequeño. Pero en software, donde un proyecto puede tener cientos de archivos y decenas de personas trabajando al mismo tiempo, es una receta para el desastre.
+
+**Git nació para resolver exactamente este caos.**
+
+---
+
+### ¿Qué es Git?
+
+**Git es un sistema de control de versiones.** En palabras simples: es un programa que registra todos los cambios que haces en tus archivos, te permite volver a cualquier versión anterior y coordinar el trabajo de múltiples personas sobre el mismo proyecto.
+
+Piensa en Git como tres cosas a la vez:
+
+1. **Una máquina del tiempo** — Puedes volver a cualquier punto en la historia de tu proyecto. ¿El código funcionaba el martes pero hoy no? Vuelves al martes y comparas qué cambió.
+
+2. **Un cuaderno de bitácora** — Cada cambio queda registrado: qué se modificó, quién lo hizo, cuándo y por qué. Es un historial completo y detallado de la evolución de tu proyecto.
+
+3. **Un coordinador de equipo** — Permite que varias personas trabajen en el mismo proyecto simultáneamente, cada una en su propia "copia de trabajo", y luego combinar todos los cambios de forma ordenada.
+
+#### ¿Cómo funciona conceptualmente?
+
+Git funciona tomando **"fotos" (snapshots)** de tu proyecto. Cada vez que le dices "guarda este momento" (lo que se llama un **commit**), Git registra el estado exacto de todos tus archivos en ese instante.
+
+```
+Commit 1       Commit 2       Commit 3       Commit 4
+    📸             📸             📸             📸
+"Proyecto       "Agrego        "Corrijo       "Agrego
+ vacío"          login"         un bug"        estilos"
+```
+
+Estas fotos se encadenan en una **línea de tiempo**. Puedes moverte hacia adelante y hacia atrás por esa línea, comparar fotos entre sí, o incluso crear líneas paralelas (ramas) para experimentar sin afectar el trabajo principal.
+
+Lo más importante: **Git vive en tu computador**. Todo funciona sin internet. Cada copia de un proyecto con Git tiene la historia completa, no depende de un servidor central. Esto es lo que significa que sea "distribuido": cada persona tiene la película entera, no solo el último fotograma.
+
+<Callout type="info" title="Un poco de historia">
+  Git fue creado en 2005 por **Linus Torvalds**, el mismo creador de Linux. Lo construyó porque necesitaba una herramienta rápida y confiable para coordinar el trabajo de miles de programadores que contribuyen al kernel de Linux. Hoy, Git es el estándar de la industria: lo usan desde startups de 2 personas hasta empresas como Google, Microsoft y Meta.
+</Callout>
+
+---
+
+### ¿Qué NO es Git?
+
+Esto genera mucha confusión al principio, así que vamos a dejarlo claro:
+
+**Git NO es GitHub.** Esta es la confusión más común. Son cosas diferentes que trabajan juntas:
+
+- **Git** es la herramienta que se instala en tu computador. Registra cambios, crea versiones, maneja ramas. Funciona completamente offline.
+- **GitHub** es un servicio web (una página de internet) donde puedes subir tus proyectos Git para tener un respaldo en la nube y colaborar con otras personas.
+
+La analogía: Git es tu cámara de fotos (toma y organiza las fotos). GitHub es la galería en la nube donde las compartes (como Google Photos o iCloud). Puedes usar la cámara sin la galería, y la galería no sirve sin fotos.
+
+Existen otros servicios similares a GitHub: **GitLab**, **Bitbucket**, **Codeberg**... todos usan Git por debajo, solo cambia la plataforma web. Si aprendes Git, puedes usar cualquiera de ellos.
+
+**Git NO es solo para programadores.** Funciona con cualquier archivo de texto: documentación, configuraciones, notas, datos en CSV, scripts de análisis. Si trabajas con archivos de texto, Git puede ayudarte.
+
+**Git NO sube nada a internet automáticamente.** Todo lo que haces con Git es **local** hasta que tú decides subirlo. Puedes trabajar semanas sin conexión y subir todo después. Tú controlas cuándo y qué compartes.
+
+**Git NO guarda copias completas de cada versión.** Es más inteligente que eso: internamente guarda solo las **diferencias** entre versiones (los "deltas"), lo que lo hace increíblemente eficiente. Un proyecto con miles de versiones puede ocupar menos espacio que unas pocas copias manuales de archivos zip.
+
+---
+
+### Instalación de Git
+
+<Callout type="tip" title="WSL (Windows) y Linux">
+  Abre tu terminal y ejecuta estos dos comandos:
+
+  ```bash
+  sudo apt update
+  sudo apt install git
+  ```
+
+  El primero actualiza la lista de programas disponibles. El segundo instala Git. Te puede pedir tu contraseña (es la contraseña de tu usuario en Linux/WSL).
+</Callout>
+
+<Callout type="tip" title="macOS">
+  La forma más fácil: simplemente ejecuta `git` en la terminal. Si no está instalado, macOS te ofrecerá instalarlo automáticamente.
+
+  ```bash
+  git --version
+  # Si no está instalado, aparecerá un diálogo para instalarlo
+  ```
+
+  Alternativa con Homebrew (si lo tienes): `brew install git`
+</Callout>
+
+Para verificar que se instaló correctamente:
+
+```bash
+git --version
+# git version 2.43.0  (o la versión que sea)
+```
+
+Si ves un número de versión, ¡perfecto! Git está instalado.
+
+---
+
+### Configurar tu identidad
+
+Git necesita saber quién eres para firmar tus cambios. Es como poner tu nombre en un trabajo de la escuela: cada cambio que guardes llevará tu nombre.
+
+**Configura tu nombre:**
+
+```bash
+git config --global user.name "Tu Nombre Completo"
+```
+
+Reemplaza `"Tu Nombre Completo"` por tu nombre real (con las comillas).
+
+**Configura tu correo electrónico:**
+
+```bash
+git config --global user.email "tu@correo.com"
+```
+
+<Callout type="warning" title="Usa el mismo correo que en GitHub">
+  Cuando crees tu cuenta de GitHub (en el Módulo 6), usa el **mismo correo** que pusiste aquí. Así GitHub reconocerá tus contribuciones automáticamente.
+</Callout>
+
+¿Qué significa `--global`? Que esta configuración aplica para **todos** tus proyectos en este computador. Solo necesitas hacerlo una vez.
+
+---
+
+### Configurar el editor de texto
+
+Cuando Git necesita que escribas algo (como un mensaje largo), abre un editor de texto. Por defecto puede abrir **Vim**, que es un editor muy poderoso pero confuso para principiantes.
+
+<Callout type="info" title="La trampa de Vim">
+  Si alguna vez tu terminal se queda "atrapada" en una pantalla rara con tildes (`~`) por todos lados... ¡caíste en Vim! No te preocupes, le pasa a todo el mundo. Para escapar: presiona `Esc`, escribe `:q!` y presiona `Enter`. Listo, estás libre.
+</Callout>
+
+Para evitar ese problema, configuramos VS Code como editor:
+
+```bash
+git config --global core.editor "code --wait"
+```
+
+El `--wait` le dice a Git que espere a que cierres el archivo en VS Code antes de continuar.
+
+---
+
+### Configurar la rama principal
+
+Por convención moderna, la rama principal se llama `main`. Configuremos eso:
+
+```bash
+git config --global init.defaultBranch main
+```
+
+No te preocupes si no entiendes qué son las "ramas" todavía. Lo veremos en el Módulo 5. Por ahora solo estamos dejando todo bien configurado.
+
+---
+
+### Verificar tu configuración
+
+Para ver todo lo que configuraste:
+
+```bash
+git config --list
+# user.name=Tu Nombre Completo
+# user.email=tu@correo.com
+# core.editor=code --wait
+# init.defaultbranch=main
+```
+
+Si ves tus datos ahí, ¡todo está perfecto!
+
+<Callout type="warning" title="Esto se hace UNA SOLA VEZ">
+  Toda esta configuración se hace una sola vez por computador. No necesitas repetirla en cada proyecto nuevo.
+</Callout>
+
+<Callout type="tip" title="¿Te equivocaste?">
+  Si escribiste mal tu nombre o correo, simplemente ejecuta el comando de nuevo con el valor correcto. El nuevo valor reemplaza al anterior. No pasa nada malo.
+</Callout>
+
+---
+
+### Tabla resumen
+
+<CommandTable commands={[
+  { command: "git --version", description: "Verificar que Git está instalado" },
+  { command: "git config --global user.name \"nombre\"", description: "Configurar tu nombre" },
+  { command: "git config --global user.email \"correo\"", description: "Configurar tu correo" },
+  { command: "git config --global core.editor \"code --wait\"", description: "Configurar VS Code como editor" },
+  { command: "git config --global init.defaultBranch main", description: "Configurar la rama principal como main" },
+  { command: "git config --list", description: "Ver toda tu configuración" },
+]} />
+
+---
+
+### Ejercicios del módulo
+
+**Ejercicio 1:** Instala Git en tu computador y verifica la instalación con `git --version`. ¿Qué versión tienes?
+
+**Ejercicio 2:** Configura tu nombre y correo electrónico:
+
+```bash
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu@correo.com"
+```
+
+**Ejercicio 3:** Configura VS Code como tu editor por defecto:
+
+```bash
+git config --global core.editor "code --wait"
+```
+
+**Ejercicio 4:** Verifica que toda tu configuración está correcta:
+
+```bash
+git config --list
+```
+
+¿Aparecen tu nombre, correo y editor? ¡Excelente, estás listo para empezar a usar Git!
+
+<Callout type="info" title="¡Configuración completa!">
+  Ya tienes Git instalado y configurado. En el siguiente módulo vamos a crear nuestro primer repositorio y hacer nuestros primeros commits. ¡Ahí es donde empieza la magia!
+</Callout>

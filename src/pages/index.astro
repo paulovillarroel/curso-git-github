@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import MobileNav from '../components/MobileNav.astro';
+import Hero from '../components/Hero.astro';
+import ModuleSection from '../components/ModuleSection.astro';
+import Footer from '../components/Footer.astro';
+import ScrollToTop from '../components/ScrollToTop.astro';
+import NextSection from '../components/NextSection.astro';
+
+import Module01 from '../content/module-01.mdx';
+import Module02 from '../content/module-02.mdx';
+import Module03 from '../content/module-03.mdx';
+import Module04 from '../content/module-04.mdx';
+import Module05 from '../content/module-05.mdx';
+import Module06 from '../content/module-06.mdx';
+import Module07 from '../content/module-07.mdx';
+import Module08 from '../content/module-08.mdx';
+import ErroresComunes from '../content/errores-comunes.mdx';
+import Exercises from '../content/exercises.mdx';
+import Cheatsheet from '../content/cheatsheet.mdx';
+---
+
+<Layout title="Curso de Git y GitHub">
+  <Sidebar />
+  <MobileNav />
+
+  <main class="lg:ml-70 pt-14 lg:pt-0">
+    <Hero />
+
+    <ModuleSection id="modulo-1" title="Supervivencia básica en Terminal" number="01">
+      <Module01 />
+    </ModuleSection>
+
+    <ModuleSection id="modulo-2" title="Configuración inicial" number="02" alternate>
+      <Module02 />
+    </ModuleSection>
+
+    <ModuleSection id="modulo-3" title="El ciclo de vida local" number="03">
+      <Module03 />
+    </ModuleSection>
+
+    <ModuleSection id="modulo-4" title="Viajes en el tiempo" number="04" alternate>
+      <Module04 />
+    </ModuleSection>
+
+    <ModuleSection id="modulo-5" title="Universos paralelos (Ramas)" number="05">
+      <Module05 />
+    </ModuleSection>
+
+    <ModuleSection id="modulo-6" title="La nube (GitHub)" number="06" alternate>
+      <Module06 />
+    </ModuleSection>
+
+    <ModuleSection id="modulo-7" title="Flujo profesional colaborativo" number="07">
+      <Module07 />
+    </ModuleSection>
+
+    <ModuleSection id="modulo-8" title="GitHub CLI y agentes de IA" number="08" alternate>
+      <Module08 />
+    </ModuleSection>
+
+    <ModuleSection id="errores-comunes" title="Errores comunes y sus soluciones">
+      <ErroresComunes />
+    </ModuleSection>
+
+    <ModuleSection id="ejercicios" title="Ejercicios integradores finales" alternate>
+      <Exercises />
+    </ModuleSection>
+
+    <ModuleSection id="cheatsheet" title="Cheatsheet de Git">
+      <Cheatsheet />
+    </ModuleSection>
+
+    <Footer />
+  </main>
+
+  <ScrollToTop />
+  <NextSection />
+</Layout>

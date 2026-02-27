@@ -1,0 +1,262 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## Las ramas son como universos paralelos
+
+Imagina que eres un científico y quieres probar una idea loca. No vas a experimentar en tu laboratorio principal (podrías romper algo), así que creas un **laboratorio paralelo**. Si el experimento funciona, traes los resultados al laboratorio principal. Si no funciona, simplemente cierras el laboratorio paralelo y todo sigue igual.
+
+Eso es exactamente lo que hacen las **ramas** en Git.
+
+```
+        main:    A --- B --- C
+                              \
+        feature:               D --- E
+```
+
+En este diagrama, `main` es tu laboratorio principal con los commits A, B y C. Luego creaste una rama `feature` donde hiciste los commits D y E. **Mientras trabajas en `feature`, `main` no se ve afectado para nada.**
+
+---
+
+### `git branch` — Ver en qué universo estás
+
+`git branch` te muestra todas las ramas que existen y marca con un asterisco (`*`) en la que estás parado.
+
+```bash
+git branch
+# * main
+```
+
+Solo tenemos una rama: `main`. Y el `*` nos dice que estamos ahí.
+
+---
+
+### `git switch -c` — Crear un laboratorio nuevo
+
+`git switch -c` crea una rama nueva **y** te mueve a ella automáticamente. La `-c` viene de "create" (crear).
+
+```bash
+# Crear una nueva rama y movernos a ella
+git switch -c feature/saludo
+# Switched to a new branch 'feature/saludo'
+
+git branch
+#   main
+# * feature/saludo
+```
+
+Ahora estás en la rama `feature/saludo`. Todo lo que hagas aquí (commits, cambios) NO afecta a `main`.
+
+<Callout type="tip" title="Nombres descriptivos para tus ramas">
+  Usa nombres que digan qué estás haciendo:
+
+  - `feature/login` — estás creando la funcionalidad de login
+  - `fix/error-calculo` — estás arreglando un error en un cálculo
+  - `mejora/diseño-header` — estás mejorando el diseño del header
+
+  Evita nombres genéricos como `test`, `prueba` o `rama1`.
+</Callout>
+
+---
+
+### Trabajar en tu rama
+
+Una vez en tu rama, el flujo es exactamente el mismo que aprendiste: editar → `git add` → `git commit`.
+
+```bash
+# Estamos en feature/saludo
+echo "¡Hola Mundo desde Git!" > saludo.txt
+git add saludo.txt
+git commit -m "Agrega archivo de saludo"
+
+# Hacer otro cambio
+echo "Bienvenido al curso de Git" >> saludo.txt
+git add saludo.txt
+git commit -m "Agrega mensaje de bienvenida al saludo"
+```
+
+Estos commits solo existen en `feature/saludo`. La rama `main` no sabe nada de ellos.
+
+---
+
+### `git switch main` — Volver a la realidad
+
+Cuando vuelves a `main`, tus archivos cambian para reflejar el estado de `main`. Es como magia.
+
+```bash
+# Volver a main
+git switch main
+# Switched to branch 'main'
+
+# Verificar: ¿existe saludo.txt?
+ls
+# receta.txt
+# (¡No hay saludo.txt! Solo existe en la otra rama)
+```
+
+<Callout type="info" title="¡No te asustes!">
+  Tus cambios no se perdieron. Están seguros en la rama `feature/saludo`. Si vuelves a ella con `git switch feature/saludo`, el archivo `saludo.txt` reaparece. Git mueve los archivos automáticamente según la rama en la que estés.
+</Callout>
+
+---
+
+### `git merge` — Traer el experimento exitoso a la realidad
+
+Cuando estás satisfecho con tu trabajo en una rama, puedes **mezclar** (merge) esos cambios en `main`. Es como decir: "el experimento funcionó, traigan todo al laboratorio principal".
+
+**Importante:** Primero debes estar en la rama que **recibe** los cambios (generalmente `main`).
+
+```bash
+# 1. Asegúrate de estar en main
+git switch main
+
+# 2. Traer los cambios de feature/saludo
+git merge feature/saludo
+# Updating a1b2c3d..e5f6a7b
+# Fast-forward
+#  saludo.txt | 2 ++
+#  1 file changed, 2 insertions(+)
+#  create mode 100644 saludo.txt
+
+# 3. Verificar
+ls
+# receta.txt  saludo.txt   ← ¡ahora saludo.txt está en main!
+
+git log --oneline
+# e5f6a7b Agrega mensaje de bienvenida al saludo
+# d4e5f6a Agrega archivo de saludo
+# ... (commits anteriores de main)
+```
+
+---
+
+### Conflictos de merge
+
+A veces, cuando intentas hacer merge, Git encuentra un **conflicto**: dos ramas modificaron la misma línea del mismo archivo, y Git no sabe cuál elegir.
+
+**Esto no es un error.** Es Git pidiendo tu ayuda para decidir.
+
+Así se ve un archivo con conflicto:
+
+```
+<<<<<<< HEAD
+Pasta con salsa de tomate
+=======
+Pasta con salsa boloñesa
+>>>>>>> feature/nueva-receta
+```
+
+Los marcadores significan:
+- `<<<<<<< HEAD`: lo que tiene tu rama actual (main)
+- `=======`: separador
+- `>>>>>>> feature/nueva-receta`: lo que tiene la otra rama
+
+**Cómo resolver un conflicto paso a paso:**
+
+1. **Abre el archivo** en tu editor de texto
+2. **Decide qué mantener**: elimina los tres marcadores (`<<<<<<<`, `=======`, `>>>>>>>`) y deja solo el contenido correcto
+3. **Guarda** el archivo
+4. **Haz add y commit**:
+
+```bash
+# Después de editar el archivo y resolver el conflicto
+git add receta.txt
+git commit -m "Resuelve conflicto: elige salsa boloñesa"
+```
+
+<Callout type="tip" title="Los conflictos NO son errores">
+  Los conflictos son normales y esperables cuando trabajas con ramas. Git simplemente te pide ayuda para decidir qué versión mantener. No te asustes cuando veas uno.
+</Callout>
+
+---
+
+### `git branch -d` — Limpieza
+
+Después de hacer merge, la rama ya cumplió su propósito. Puedes borrarla para mantener las cosas ordenadas.
+
+```bash
+# Borrar la rama (solo funciona si ya fue mergeada)
+git branch -d feature/saludo
+# Deleted branch feature/saludo (was e5f6a7b).
+```
+
+La `-d` es de "delete" (borrar). Si la rama no ha sido mergeada, Git te avisará para que no pierdas trabajo accidentalmente.
+
+---
+
+### Tabla resumen
+
+<CommandTable commands={[
+  { command: "git branch", description: "Listar ramas y ver la actual (*)" },
+  { command: "git switch -c nombre-rama", description: "Crear una rama nueva y moverte a ella" },
+  { command: "git switch nombre-rama", description: "Cambiar de rama" },
+  { command: "git merge nombre-rama", description: "Traer los cambios de una rama a la actual" },
+  { command: "git branch -d nombre-rama", description: "Borrar una rama ya mergeada" },
+]} />
+
+---
+
+### Ejercicios del módulo
+
+**Ejercicio 1:** Crea una rama `feature/saludo`, agrega un archivo `saludo.txt` con algún contenido, y haz commit:
+
+```bash
+git switch -c feature/saludo
+echo "¡Hola desde una rama!" > saludo.txt
+git add saludo.txt
+git commit -m "Agrega archivo de saludo"
+```
+
+**Ejercicio 2:** Vuelve a `main` y verifica que el archivo `saludo.txt` NO está:
+
+```bash
+git switch main
+ls
+# ¿Ves saludo.txt? No debería estar
+```
+
+**Ejercicio 3:** Mergea la rama a `main` y verifica que el archivo AHORA SÍ está:
+
+```bash
+git merge feature/saludo
+ls
+# Ahora saludo.txt debería aparecer
+```
+
+**Ejercicio 4:** Borra la rama con `git branch -d`:
+
+```bash
+git branch -d feature/saludo
+git branch
+# Solo debería quedar main
+```
+
+**Ejercicio 5 (Desafío):** Crea un conflicto a propósito y resuélvelo:
+
+```bash
+# Crear un archivo base
+echo "Color favorito: azul" > preferencias.txt
+git add . && git commit -m "Agrega preferencias"
+
+# Crear una rama y cambiar el color
+git switch -c feature/color
+echo "Color favorito: rojo" > preferencias.txt
+git add . && git commit -m "Cambia color a rojo"
+
+# Volver a main y cambiar el color diferente
+git switch main
+echo "Color favorito: verde" > preferencias.txt
+git add . && git commit -m "Cambia color a verde"
+
+# Intentar merge (¡conflicto!)
+git merge feature/color
+# CONFLICT (content): Merge conflict in preferencias.txt
+
+# Abre preferencias.txt, resuelve el conflicto, luego:
+git add preferencias.txt
+git commit -m "Resuelve conflicto: elige color verde"
+git branch -d feature/color
+```
+
+<Callout type="info" title="¡Las ramas son tu superpoder!">
+  Con ramas puedes experimentar libremente sin miedo. Crea tantas ramas como quieras para probar ideas. Si funcionan, las mergeas. Si no, las borras. Así de simple.
+</Callout>

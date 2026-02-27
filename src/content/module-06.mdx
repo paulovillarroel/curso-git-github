@@ -1,0 +1,357 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## GitHub es como Google Drive pero para código
+
+Hasta ahora, todo lo que has hecho con Git es **local**: vive solo en tu computador. Si tu disco duro muere mañana, pierdes todo.
+
+**GitHub** es un servicio en la nube donde puedes subir tus repositorios Git. Piensa en la diferencia así:
+
+- **Git** = la herramienta que instalaste en tu computador (la cámara de fotos)
+- **GitHub** = un servicio web donde subes tus repositorios (Instagram para código)
+
+GitHub te da dos cosas fundamentales:
+1. **Respaldo**: Tu código está seguro en la nube
+2. **Colaboración**: Otras personas pueden ver, descargar y contribuir a tu código
+
+---
+
+### Crear tu cuenta en GitHub
+
+Si todavía no tienes cuenta:
+
+1. Ve a [github.com](https://github.com) y haz clic en "Sign up"
+2. Usa el **mismo correo** que configuraste en Git (Módulo 2)
+3. Elige un nombre de usuario que te guste (será tu identidad como desarrollador)
+4. Completa el proceso de verificación
+
+---
+
+### Crear un repositorio en GitHub
+
+Vamos a crear un repositorio vacío en GitHub para subir nuestro proyecto:
+
+1. En GitHub, haz clic en el botón verde **"New"** (o en el `+` de la esquina superior derecha → "New repository")
+2. Ponle un nombre (ejemplo: `mi-receta`)
+3. **NO** marques "Add a README file" (queremos un repo vacío)
+4. **NO** selecciones un `.gitignore` ni licencia por ahora
+5. Haz clic en **"Create repository"**
+
+GitHub te mostrará una página con instrucciones. Esas instrucciones son exactamente lo que haremos a continuación.
+
+---
+
+### Configurar autenticación
+
+Para que Git pueda subir código a GitHub, necesitas autenticarte. La forma más fácil para principiantes:
+
+<Callout type="tip" title="Opción recomendada: GitHub CLI (gh)">
+  La forma más fácil de autenticarte es con GitHub CLI:
+
+  **Instalar en WSL/Linux (Ubuntu 24.04):**
+  ```bash
+  sudo apt update
+  sudo apt install gh
+  ```
+
+  Si `apt` no encuentra el paquete `gh`, visita <a href="https://cli.github.com/" target="_blank" rel="noopener noreferrer">cli.github.com</a> para ver cómo agregar el repositorio oficial de GitHub CLI a tu sistema.
+
+  **Instalar en macOS:**
+  ```bash
+  brew install gh
+  ```
+
+  **Autenticarte:**
+  ```bash
+  gh auth login
+  ```
+
+  Sigue las instrucciones en pantalla: elige "GitHub.com", "HTTPS", y "Login with a web browser". Se abrirá tu navegador para autorizar.
+</Callout>
+
+<Callout type="info" title="Alternativa: Token personal (HTTPS)">
+  Si prefieres no instalar `gh`, puedes crear un token personal:
+
+  1. En GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+  2. "Generate new token (classic)"
+  3. Dale un nombre, selecciona el permiso `repo`, y genera el token
+  4. **Copia el token** (solo lo ves una vez)
+  5. Cuando Git te pida contraseña, usa el token en vez de tu contraseña
+
+  También puedes guardar el token para no tenerlo que poner cada vez:
+  ```bash
+  git config --global credential.helper store
+  ```
+
+  **Advertencia:** `credential.helper store` guarda tu token en un archivo de texto sin encriptar en tu computador (`~/.git-credentials`). Es cómodo para practicar, pero en un entorno profesional o compartido es mejor usar `gh auth login` o un gestor de credenciales seguro.
+</Callout>
+
+<Callout type="info" title="SSH es más avanzado">
+  Existe otra forma de autenticación llamada SSH que es más segura y no requiere poner contraseña cada vez. No la cubrimos aquí, pero funciona igual de bien. Si te interesa, puedes buscarlo en la documentación oficial de GitHub más adelante.
+</Callout>
+
+---
+
+### `git remote add origin` — Conectar tu carpeta con la nube
+
+Ahora necesitamos decirle a Git local: "este proyecto se conecta con este repositorio de GitHub". Eso se hace con `git remote`.
+
+```bash
+# Conectar tu repo local con GitHub
+git remote add origin https://github.com/tu-usuario/mi-receta.git
+```
+
+¿Qué significa cada parte?
+- `git remote add`: "agrega una conexión remota"
+- `origin`: es un **nombre** para esa conexión (es convención usar "origin" para la principal)
+- `https://github.com/...`: la URL de tu repositorio en GitHub
+
+Para verificar que la conexión se creó:
+
+```bash
+git remote -v
+# origin  https://github.com/tu-usuario/mi-receta.git (fetch)
+# origin  https://github.com/tu-usuario/mi-receta.git (push)
+```
+
+Si ves las dos líneas (fetch y push), la conexión está lista.
+
+---
+
+### `git push -u origin main` — Subir tu trabajo a la nube
+
+¡El momento de la verdad! `git push` sube tus commits locales a GitHub.
+
+```bash
+# Primera vez: necesitas el -u para establecer la conexión
+git push -u origin main
+# Enumerating objects: 6, done.
+# Counting objects: 100% (6/6), done.
+# Writing objects: 100% (6/6), 523 bytes | 523.00 KiB/s, done.
+# Total 6 (delta 0), reused 0 (delta 0)
+# To https://github.com/tu-usuario/mi-receta.git
+#  * [new branch]      main -> main
+# Branch 'main' set up to track remote branch 'main' from 'origin'.
+```
+
+¿Qué significa `-u`? Le dice a Git "recuerda que `main` local se conecta con `main` en GitHub". Después de la primera vez, solo necesitas:
+
+```bash
+git push
+# (sin -u, sin origin, sin main, Git ya recuerda)
+```
+
+¡Ve a GitHub en tu navegador y actualiza la página de tu repositorio! Deberías ver tus archivos ahí.
+
+---
+
+### `git clone` — Descargar un proyecto de internet
+
+`git clone` descarga una copia completa de un repositorio de GitHub a tu computador. Ya viene con todo configurado: la conexión remota, el historial de commits, todo.
+
+```bash
+# Clonar un repositorio
+git clone https://github.com/usuario/nombre-repo.git
+# Cloning into 'nombre-repo'...
+# remote: Enumerating objects: 20, done.
+# ...
+
+# Entrar al repo clonado
+cd nombre-repo
+
+# Ya tiene todo configurado
+git remote -v
+# origin  https://github.com/usuario/nombre-repo.git (fetch)
+# origin  https://github.com/usuario/nombre-repo.git (push)
+
+git log --oneline
+# (todo el historial del proyecto)
+```
+
+---
+
+### Fork — Tu propia copia de un proyecto ajeno
+
+Un **fork** es una copia completa de un repositorio de otra persona en **tu cuenta** de GitHub. Es diferente a clonar:
+
+- **Clone**: descarga un repo a tu computador (copia local)
+- **Fork**: crea una copia del repo en tu cuenta de GitHub (copia en la nube)
+
+¿Para qué sirve? Imagina que encuentras un proyecto open source que quieres mejorar. No puedes hacer push directamente al repo de otra persona (no tienes permisos), pero puedes:
+
+1. **Hacer fork** del proyecto (ahora tienes tu propia copia en GitHub)
+2. **Clonar tu fork** a tu computador
+3. Hacer tus cambios y push a **tu fork**
+4. Crear un Pull Request desde tu fork al proyecto original
+
+**Cómo hacer un fork:**
+
+1. Ve al repositorio en GitHub que quieres copiar
+2. Haz clic en el botón **"Fork"** (esquina superior derecha)
+3. Selecciona tu cuenta como destino
+4. ¡Listo! Ahora tienes una copia en `github.com/tu-usuario/nombre-repo`
+
+**Trabajar con tu fork:**
+
+```bash
+# Clonar TU fork (no el repo original)
+git clone https://github.com/tu-usuario/nombre-repo.git
+cd nombre-repo
+
+# Verificar: origin apunta a TU fork
+git remote -v
+# origin  https://github.com/tu-usuario/nombre-repo.git (fetch)
+# origin  https://github.com/tu-usuario/nombre-repo.git (push)
+
+# Hacer cambios, commits y push a tu fork
+echo "Mi mejora" >> archivo.txt
+git add . && git commit -m "Agrega mejora"
+git push
+```
+
+Después puedes ir a GitHub y crear un Pull Request desde tu fork al repositorio original. Así es como se contribuye a proyectos open source.
+
+**Mantener tu fork actualizado:**
+
+Con el tiempo, el proyecto original seguirá avanzando. Para traer esos cambios a tu fork:
+
+```bash
+# Agregar una conexión al repo original (se hace una sola vez)
+git remote add upstream https://github.com/autor-original/nombre-repo.git
+
+# Traer los cambios del original y actualizar tu fork
+git fetch upstream
+git switch main
+git merge upstream/main
+git push
+# Ahora tu fork está al día con el proyecto original
+```
+
+`upstream` es el nombre convencional para el repositorio original (el que forkeaste). `origin` sigue siendo tu fork.
+
+<Callout type="tip" title="Fork vs Clone: ¿cuándo usar cada uno?">
+  - **Clone**: cuando quieres descargar un repo para verlo o usarlo localmente
+  - **Fork**: cuando quieres hacer cambios y eventualmente proponerlos al proyecto original, o cuando quieres tu propia versión independiente de un proyecto
+</Callout>
+
+---
+
+### `git fetch` — Preguntar si hay novedades
+
+`git fetch` revisa si hay cambios nuevos en GitHub **sin aplicarlos** a tus archivos. Es como mirar el buzón sin abrir las cartas.
+
+```bash
+git fetch
+# Si hay cambios nuevos, te muestra información
+# Si no hay cambios, no muestra nada
+```
+
+Es útil para verificar si alguien más subió cambios antes de traerlos.
+
+---
+
+### `git pull` — Traer las novedades y aplicarlas
+
+`git pull` es como `git fetch` + `git merge`: descarga los cambios de GitHub **y** los aplica a tus archivos locales.
+
+```bash
+git pull
+# Already up to date.
+# (o te muestra los archivos que se actualizaron)
+```
+
+<Callout type="warning" title="Siempre haz commit antes de pull">
+  Antes de hacer `git pull`, asegúrate de haber hecho commit de todos tus cambios locales. Si tienes cambios sin guardar y los cambios remotos tocan los mismos archivos, podrías tener conflictos difíciles de resolver.
+
+  ```bash
+  # Antes de pull, siempre:
+  git status
+  # Si hay cambios pendientes:
+  git add .
+  git commit -m "Guarda cambios antes de pull"
+  # Ahora sí:
+  git pull
+  ```
+</Callout>
+
+---
+
+### Ejemplo práctico completo
+
+Vamos a hacer todo el flujo desde cero:
+
+```bash
+# 1. Crear proyecto local
+mkdir mi-proyecto-web && cd mi-proyecto-web
+git init
+
+# 2. Crear archivos
+echo "<!DOCTYPE html><html><body><h1>Hola Mundo</h1></body></html>" > index.html
+echo "body { font-family: sans-serif; }" > estilos.css
+
+# 3. Hacer commit
+git add .
+git commit -m "Crea estructura básica del sitio web"
+
+# 4. Crear repositorio vacío en GitHub (hazlo desde el navegador)
+# Nombre: mi-proyecto-web, sin README, sin .gitignore
+
+# 5. Conectar y subir
+git remote add origin https://github.com/tu-usuario/mi-proyecto-web.git
+git push -u origin main
+
+# 6. Verificar en GitHub: ¡tus archivos están ahí!
+```
+
+---
+
+### Tabla resumen
+
+<CommandTable commands={[
+  { command: "git remote add origin <URL>", description: "Conectar repo local con GitHub" },
+  { command: "git remote -v", description: "Ver las conexiones remotas configuradas" },
+  { command: "git push -u origin main", description: "Subir código a GitHub (primera vez)" },
+  { command: "git push", description: "Subir código a GitHub (siguientes veces)" },
+  { command: "git clone <URL>", description: "Descargar un repositorio de GitHub" },
+  { command: "Fork (botón en GitHub)", description: "Crear tu propia copia de un repo ajeno" },
+  { command: "git fetch", description: "Revisar si hay cambios nuevos (sin aplicar)" },
+  { command: "git pull", description: "Descargar y aplicar cambios de GitHub" },
+]} />
+
+---
+
+### Ejercicios del módulo
+
+**Ejercicio 1:** Crea un repositorio vacío en GitHub (sin README, sin .gitignore). Anota la URL que te da.
+
+**Ejercicio 2:** Conecta tu repo local de práctica con GitHub:
+
+```bash
+git remote add origin https://github.com/tu-usuario/tu-repo.git
+git remote -v
+# ¿Ves las dos líneas (fetch y push)?
+```
+
+**Ejercicio 3:** Sube tu trabajo con `git push -u origin main`:
+
+```bash
+git push -u origin main
+```
+
+**Ejercicio 4:** Ve a GitHub en tu navegador y verifica que tus archivos están ahí. ¿Puedes ver los commits? ¿Los archivos?
+
+**Ejercicio 5:** Clona un repositorio público a tu máquina. Puedes clonar el repositorio de este mismo curso:
+
+```bash
+cd ~
+git clone https://github.com/paulovillarroel/curso-git-github.git curso-git-github-copia
+cd curso-git-github-copia
+ls
+git log --oneline
+```
+
+**Ejercicio 6:** Haz fork de un repositorio público: ve a cualquier repo en GitHub, haz clic en "Fork", clona **tu fork** y verifica con `git remote -v` que apunta a tu cuenta.
+
+<Callout type="info" title="¡Tu código está en la nube!">
+  Ahora tienes un respaldo de tu trabajo en GitHub. Si tu computador se pierde, tu código sigue a salvo. Además, cualquier persona puede ver y clonar tu repositorio público. Y con fork, puedes contribuir a cualquier proyecto open source. ¡Eso es el poder de GitHub!
+</Callout>

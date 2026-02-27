@@ -1,0 +1,188 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## Git es tu red de seguridad
+
+Si el experimento falla, siempre puedes volver atrás. Esa es la gran promesa de Git: que puedes experimentar sin miedo porque nada se pierde de verdad (siempre y cuando hagas commits).
+
+En este módulo vas a aprender a viajar en el tiempo por tu proyecto, deshacer errores y corregir metidas de pata. Todos cometemos errores, y Git está diseñado para eso.
+
+---
+
+### `git log --oneline` — Repaso: tu mapa del tiempo
+
+Antes de viajar, necesitas saber a dónde puedes ir. Cada commit tiene un **hash** único: esos 7 caracteres raros al inicio de cada línea.
+
+```bash
+git log --oneline
+# d4e5f6a Agrega instrucciones de preparación
+# b2c3d4e Agrega lista de ingredientes
+# a1b2c3d Agrega receta inicial de pasta
+```
+
+Esos hashes (`d4e5f6a`, `b2c3d4e`, `a1b2c3d`) son como las coordenadas de cada punto en el tiempo. Los vas a usar para decirle a Git a dónde quieres ir.
+
+---
+
+### `git switch --detach` — Modo turista al pasado
+
+¿Quieres ver cómo era tu proyecto hace 3 commits? `git switch --detach` te lleva ahí como un turista: puedes mirar pero no deberías cambiar nada.
+
+```bash
+# Viajar al primer commit
+git switch --detach a1b2c3d
+# HEAD is now at a1b2c3d Agrega receta inicial de pasta
+
+# Ahora tu proyecto está exactamente como estaba en ese momento
+cat receta.txt
+# # Receta de Pasta
+# (solo la primera línea, porque los ingredientes se agregaron después)
+```
+
+Piensa en esto como visitar un museo: puedes mirar todo, pero si quieres hacer cambios permanentes, deberías volver a tu rama primero.
+
+Git te va a mostrar un mensaje que dice **"HEAD detached"**. No te asustes, es normal. Significa que estás visitando el pasado pero no estás "parado" en ninguna rama.
+
+<Callout type="info" title="Detached HEAD: puedes mirar (y técnicamente editar), pero ten cuidado">
+  Mientras estés en "detached HEAD", puedes explorar e incluso hacer commits. Pero esos commits **no pertenecen a ninguna rama**, así que si cambias de rama sin guardarlos, se perderán. Para explorar es completamente seguro. Si quieres hacer cambios permanentes, primero crea una rama con `git switch -c nombre-rama`.
+</Callout>
+
+Para volver al presente:
+
+```bash
+git switch main
+# Switched to branch 'main'
+# ¡De vuelta al presente! Tus archivos vuelven a su estado actual.
+```
+
+---
+
+### `git revert` — El antídoto seguro
+
+`git revert` es la forma **recomendada** de deshacer un cambio. Es como tachar algo con corrector en vez de arrancar la página: el error original sigue en la historia, pero creas un nuevo commit que lo deshace.
+
+```bash
+# Supongamos que el último commit agregó algo que no querías
+git log --oneline
+# d4e5f6a Agrega instrucciones de preparación   ← este fue un error
+# b2c3d4e Agrega lista de ingredientes
+# a1b2c3d Agrega receta inicial de pasta
+
+# Revertir el último commit
+git revert d4e5f6a
+# Se abre tu editor para el mensaje del commit de reversión
+# (guarda y cierra el editor)
+
+# Ahora el historial tiene un commit nuevo que deshace el cambio
+git log --oneline
+# e5f6a7b Revert "Agrega instrucciones de preparación"
+# d4e5f6a Agrega instrucciones de preparación
+# b2c3d4e Agrega lista de ingredientes
+# a1b2c3d Agrega receta inicial de pasta
+```
+
+¿Ves? El commit original sigue ahí (la historia no se borró), pero hay un nuevo commit que deshace sus cambios. Es la forma más limpia y segura.
+
+<Callout type="tip" title="¿Cuándo usar revert?">
+  Usa `git revert` cuando ya compartiste tu código con otras personas (lo subiste a GitHub). Es seguro porque no borra historia, solo agrega un nuevo commit que deshace el cambio.
+</Callout>
+
+---
+
+### `git reset --soft HEAD~1` — "Oops, me equivoqué en el mensaje"
+
+¿Hiciste un commit pero te equivocaste en el mensaje? ¿O te olvidaste de agregar un archivo? `git reset --soft` deshace el commit pero **deja tus archivos intactos** en el staging.
+
+```bash
+# Acabas de hacer un commit con un typo en el mensaje
+git log --oneline
+# f6a7b8c Agrega ingredentes   ← ups, "ingredentes" tiene un typo
+
+# Deshacer el commit (los archivos quedan en staging)
+git reset --soft HEAD~1
+
+# Verificar: los archivos siguen listos para commit
+git status
+# Changes to be committed:
+#   modified: receta.txt
+
+# Ahora puedes hacer el commit de nuevo con el mensaje correcto
+git commit -m "Agrega ingredientes"
+```
+
+¿Qué significa `HEAD~1`? Es como decir "un paso atrás desde donde estoy". `HEAD` es "donde estoy ahora" y `~1` es "menos uno".
+
+---
+
+### `git reset --hard HEAD~1` — El botón nuclear
+
+<Callout type="warning" title="⚠️ PELIGRO: Este comando DESTRUYE cambios">
+  `git reset --hard` elimina el commit **Y todos los cambios en los archivos**. No hay vuelta atrás. Úsalo solo si estás 100% seguro de que quieres borrar todo.
+</Callout>
+
+```bash
+# Esto BORRA el último commit y todos sus cambios
+git reset --hard HEAD~1
+# HEAD is now at b2c3d4e Agrega lista de ingredientes
+```
+
+Después de ejecutar esto, es como si el último commit nunca hubiera existido. Los archivos vuelven al estado del commit anterior y los cambios se pierden para siempre.
+
+**¿Cuándo usarlo?** Casi nunca. Solo cuando hiciste algo realmente mal y estás seguro de que quieres eliminarlo por completo. En la mayoría de los casos, `git revert` es mejor opción.
+
+---
+
+### Tabla resumen
+
+<CommandTable commands={[
+  { command: "git log --oneline", description: "Ver historial compacto con hashes" },
+  { command: "git switch --detach <hash>", description: "Visitar un commit pasado (modo turista)" },
+  { command: "git switch main", description: "Volver al presente" },
+  { command: "git revert <hash>", description: "Deshacer un commit de forma segura (crea nuevo commit)" },
+  { command: "git reset --soft HEAD~1", description: "Deshacer el último commit, archivos quedan en staging" },
+  { command: "git reset --hard HEAD~1", description: "⚠️ BORRAR último commit y todos sus cambios" },
+]} />
+
+| Comando | ¿Es seguro? | ¿Cuándo usarlo? |
+|---------|-------------|-----------------|
+| `git switch --detach` | Sí, para explorar | Para visitar el pasado (los commits que hagas aquí se pierden si no creas una rama) |
+| `git revert` | Sí, es la opción recomendada | Para deshacer un cambio manteniendo la historia |
+| `git reset --soft` | Sí, los archivos no se pierden | Para corregir un mensaje de commit o agregar archivos olvidados |
+| `git reset --hard` | **NO, destruye cambios** | Solo cuando estás 100% seguro de querer borrar todo |
+
+---
+
+### Ejercicios del módulo
+
+**Ejercicio 1:** Crea un repo de práctica con 3 commits (uno por cada cambio en un archivo):
+
+```bash
+mkdir practica-tiempo && cd practica-tiempo
+git init
+echo "Línea 1: Hola" > archivo.txt
+git add . && git commit -m "Agrega línea 1"
+echo "Línea 2: Mundo" >> archivo.txt
+git add . && git commit -m "Agrega línea 2"
+echo "Línea 3: Git es genial" >> archivo.txt
+git add . && git commit -m "Agrega línea 3"
+```
+
+**Ejercicio 2:** Usa `git log --oneline` para ver el historial. Deberías ver 3 commits con sus hashes.
+
+**Ejercicio 3:** Viaja al primer commit con `git switch --detach <hash>` (usa el hash de tu primer commit). Mira el contenido del archivo con `cat archivo.txt`. ¿Solo tiene la línea 1? Vuelve al presente con `git switch main`.
+
+**Ejercicio 4:** Usa `git revert` para deshacer el último commit. Revisa con `git log --oneline` que se creó un nuevo commit de reversión. Verifica con `cat archivo.txt` que la línea 3 desapareció.
+
+**Ejercicio 5:** Haz un commit nuevo y luego deshazlo con `git reset --soft HEAD~1`. Verifica con `git status` que los archivos siguen en staging (en verde).
+
+```bash
+echo "Línea extra de prueba" >> archivo.txt
+git add . && git commit -m "Agrega línea extra"
+git reset --soft HEAD~1
+git status
+# Deberías ver los cambios en staging (verde)
+```
+
+<Callout type="tip" title="¡No te preocupes si te equivocas!">
+  Estos ejercicios son para experimentar. Si algo sale mal, simplemente borra la carpeta (`cd .. && rm -rf practica-tiempo`) y empieza de nuevo. Esa es la belleza de los repos de práctica: puedes destruirlos sin consecuencias.
+</Callout>

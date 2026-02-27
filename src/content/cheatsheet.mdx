@@ -1,0 +1,199 @@
+import Callout from '../components/Callout.astro';
+
+## Tu referencia rápida de Git y GitHub
+
+Imprime esta página o guárdala en favoritos. Cuando se te olvide un comando, vuelve aquí.
+
+<Callout type="tip" title="Consejo">
+  No necesitas memorizar todo esto. Con el tiempo, los comandos que usas a diario se vuelven automáticos. Esta hoja es para los que usas de vez en cuando.
+</Callout>
+
+---
+
+### Configuración (una sola vez)
+
+| Comando | Qué hace |
+|---------|----------|
+| `git config --global user.name "Tu Nombre"` | Configura tu nombre |
+| `git config --global user.email "tu@correo.com"` | Configura tu correo |
+| `git config --global core.editor "code --wait"` | Configura VS Code como editor |
+| `git config --global init.defaultBranch main` | Rama principal como `main` |
+| `git config --list` | Ver toda tu configuración |
+
+---
+
+### Flujo básico diario
+
+```bash
+# El flujo que usarás el 90% del tiempo:
+git status              # 1. ¿Qué cambió?
+git add archivo.txt     # 2. Preparar cambios
+git commit -m "mensaje" # 3. Guardar snapshot
+git push                # 4. Subir a GitHub
+```
+
+---
+
+### Crear y gestionar repositorios
+
+| Comando | Qué hace |
+|---------|----------|
+| `git init` | Activar Git en la carpeta actual |
+| `git clone <URL>` | Descargar un repositorio de GitHub |
+| `git remote add origin <URL>` | Conectar repo local con GitHub |
+| `git remote -v` | Ver conexiones remotas |
+
+---
+
+### Ver estado e historial
+
+| Comando | Qué hace |
+|---------|----------|
+| `git status` | Ver qué archivos cambiaron |
+| `git diff` | Ver cambios antes de `add` |
+| `git diff --staged` | Ver cambios después de `add` |
+| `git log --oneline` | Historial compacto |
+| `git log --oneline --graph` | Historial con ramas visuales |
+
+---
+
+### Staging y commits
+
+| Comando | Qué hace |
+|---------|----------|
+| `git add archivo.txt` | Preparar un archivo |
+| `git add .` | Preparar todos los archivos |
+| `git commit -m "mensaje"` | Guardar snapshot |
+| `git restore --staged archivo.txt` | Sacar del staging (sin perder cambios) |
+| `git restore archivo.txt` | Descartar cambios no commiteados |
+
+---
+
+### Ramas
+
+| Comando | Qué hace |
+|---------|----------|
+| `git branch` | Listar ramas |
+| `git switch -c nombre-rama` | Crear rama y moverse a ella |
+| `git switch nombre-rama` | Cambiar de rama |
+| `git merge nombre-rama` | Traer cambios de otra rama |
+| `git branch -d nombre-rama` | Borrar rama (ya mergeada) |
+| `git branch -m viejo nuevo` | Renombrar rama |
+
+---
+
+### Sincronización con GitHub
+
+| Comando | Qué hace |
+|---------|----------|
+| `git push -u origin main` | Subir (primera vez) |
+| `git push` | Subir (siguientes veces) |
+| `git pull` | Descargar y aplicar cambios |
+| `git fetch` | Revisar cambios sin aplicar |
+| `git push -u origin nombre-rama` | Subir una rama |
+
+---
+
+### Viajes en el tiempo
+
+| Comando | Qué hace |
+|---------|----------|
+| `git switch --detach <hash>` | Visitar un commit pasado |
+| `git switch main` | Volver al presente |
+| `git revert <hash>` | Deshacer un commit (seguro) |
+| `git reset --soft HEAD~1` | Deshacer commit, archivos en staging |
+| `git reset --hard HEAD~1` | **Deshacer commit y BORRAR cambios** |
+
+---
+
+### Emergencias
+
+| Comando | Qué hace |
+|---------|----------|
+| `git merge --abort` | Cancelar un merge con conflictos |
+| `git restore archivo.txt` | Descartar cambios en un archivo |
+| `git rm --cached archivo.txt` | Dejar de rastrear sin borrar |
+| `git show HEAD~3:archivo.txt` | Ver archivo en un commit pasado |
+| `git stash` | Guardar cambios temporalmente |
+| `git stash pop` | Recuperar cambios guardados |
+| `Esc` → `:q!` → `Enter` | Escapar de Vim |
+
+---
+
+### GitHub CLI (`gh`)
+
+| Comando | Qué hace |
+|---------|----------|
+| `gh auth login` | Autenticarse con GitHub |
+| `gh repo create nombre --public --source=. --push` | Crear repo y subir |
+| `gh pr create --title "..." --body "..."` | Crear Pull Request |
+| `gh pr list` | Listar PRs abiertos |
+| `gh pr merge --merge` | Mergear un PR |
+| `gh issue create --title "..."` | Crear un issue |
+| `gh repo view --web` | Abrir repo en el navegador |
+
+---
+
+### .gitignore (patrones comunes)
+
+```bash
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Variables de entorno y secretos
+.env
+*.secret
+
+# Dependencias (se regeneran)
+node_modules/
+vendor/
+
+# Archivos compilados / temporales
+*.log
+*.tmp
+dist/
+build/
+```
+
+---
+
+### Flujo profesional (GitHub Flow)
+
+```
+1. git switch main && git pull          ← Partir actualizado
+2. git switch -c feature/mi-tarea       ← Crear rama
+3. (trabajar, git add, git commit)      ← Hacer cambios
+4. git push -u origin feature/mi-tarea  ← Subir rama
+5. Crear Pull Request en GitHub         ← Pedir revisión
+6. Merge en GitHub                      ← Aprobar y fusionar
+7. git switch main && git pull          ← Actualizar local
+8. git branch -d feature/mi-tarea       ← Limpieza
+```
+
+---
+
+### Resolver conflictos (paso a paso)
+
+```bash
+# 1. Git te avisa del conflicto al hacer merge
+git merge otra-rama
+# CONFLICT in archivo.txt
+
+# 2. Abre el archivo y busca los marcadores:
+#    <<<<<<< HEAD
+#    (tu versión)
+#    =======
+#    (la otra versión)
+#    >>>>>>> otra-rama
+
+# 3. Edita: borra los marcadores, deja el contenido correcto
+
+# 4. Marca como resuelto y haz commit
+git add archivo.txt
+git commit -m "Resuelve conflicto en archivo.txt"
+```
+
+<Callout type="info" title="¡Guarda esta página!">
+  Con la práctica, cada vez necesitarás consultar menos esta hoja. Pero siempre es bueno tenerla a mano. ¡Feliz codificación!
+</Callout>

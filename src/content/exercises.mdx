@@ -1,0 +1,564 @@
+import Callout from '../components/Callout.astro';
+
+## Pon a prueba todo lo que aprendiste
+
+Estos ejercicios integradores combinan todos los conceptos del curso. Cada uno simula una situación real y te guía paso a paso.
+
+<Callout type="tip" title="Consejo antes de empezar">
+  Crea una carpeta de trabajo para todos los ejercicios:
+
+  ```bash
+  mkdir ~/ejercicios-git && cd ~/ejercicios-git
+  ```
+
+  Así mantienes todo organizado. Cada ejercicio creará su propia carpeta dentro.
+</Callout>
+
+No te preocupes si necesitas consultar los módulos anteriores. Eso es totalmente normal y esperado. La idea es practicar, no memorizar.
+
+---
+
+### Ejercicio 1: Mi Primer Portafolio en Git
+
+**Contexto:** Vas a crear un mini sitio web personal desde cero, usando Git para controlar cada paso, y lo subirás a GitHub.
+
+**Lo que practicarás:** `git init`, `git add`, `git commit`, `git remote`, `git push`
+
+**Requisitos:**
+- Crear un repositorio local con `git init`
+- Crear una estructura de carpetas para un sitio web
+- Crear un archivo HTML básico
+- Hacer al menos 3 commits con mensajes descriptivos
+- Crear un repositorio en GitHub y subir tu código
+
+<details>
+<summary>Ver solución</summary>
+
+```bash
+# Crear el proyecto
+mkdir mi-portafolio && cd mi-portafolio
+git init
+
+# Crear estructura de carpetas
+mkdir css js img
+
+# Crear el HTML principal
+cat > index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Portafolio</title>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+    <h1>Bienvenido a mi portafolio</h1>
+    <p>Esta es mi primera página con control de versiones.</p>
+</body>
+</html>
+EOF
+
+# Primer commit: estructura base
+git add .
+git commit -m "Crea estructura base del portafolio con HTML"
+
+# Agregar estilos
+cat > css/estilos.css << 'EOF'
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+h1 { color: #333; }
+p { color: #666; line-height: 1.6; }
+EOF
+
+# Segundo commit: estilos
+git add .
+git commit -m "Agrega estilos CSS para el portafolio"
+
+# Agregar JavaScript
+cat > js/app.js << 'EOF'
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Portafolio cargado correctamente');
+});
+EOF
+
+# Tercer commit: JavaScript
+git add .
+git commit -m "Agrega archivo JavaScript inicial"
+
+# Verificar historial
+git log --oneline
+# Deberías ver 3 commits
+
+# Crear repositorio vacío en GitHub (desde el navegador)
+# Nombre: mi-portafolio, sin README
+
+# Conectar y subir
+git remote add origin https://github.com/tu-usuario/mi-portafolio.git
+git push -u origin main
+
+# ¡Verificar en GitHub que todo está!
+```
+
+</details>
+
+---
+
+### Ejercicio 2: La Máquina del Tiempo
+
+**Contexto:** Vas a practicar todas las formas de "viajar en el tiempo" con Git: visitar el pasado, revertir cambios y usar reset.
+
+**Lo que practicarás:** `git log`, `git switch --detach`, `git revert`, `git reset --soft`
+
+**Preparación:** Crea un repo con 5 commits, cada uno agregando una línea a un archivo.
+
+**Requisitos:**
+- Viajar al commit #2 y volver
+- Revertir el commit #4
+- Hacer reset soft del último commit
+
+<details>
+<summary>Ver solución</summary>
+
+```bash
+# Preparación: crear repo con 5 commits
+mkdir maquina-del-tiempo && cd maquina-del-tiempo
+git init
+
+echo "Línea 1: Inicio del viaje" > diario.txt
+git add . && git commit -m "Agrega línea 1"
+
+echo "Línea 2: Primer descubrimiento" >> diario.txt
+git add . && git commit -m "Agrega línea 2"
+
+echo "Línea 3: Todo va bien" >> diario.txt
+git add . && git commit -m "Agrega línea 3"
+
+echo "Línea 4: Un error terrible" >> diario.txt
+git add . && git commit -m "Agrega línea 4 (error)"
+
+echo "Línea 5: Intentando arreglar" >> diario.txt
+git add . && git commit -m "Agrega línea 5"
+
+# Ver el historial
+git log --oneline
+# Verás 5 commits, anota los hashes
+
+# --- VIAJE 1: Visitar el commit #2 ---
+# Usa el hash de tu segundo commit
+git switch --detach HEAD~3
+# (HEAD~3 = 3 commits atrás = commit #2)
+cat diario.txt
+# Solo debería tener las líneas 1 y 2
+git switch main
+# ¡De vuelta al presente!
+
+# --- VIAJE 2: Revertir el commit #4 (el "error") ---
+# Busca el hash del commit #4
+git log --oneline
+# Copia el hash del commit "Agrega línea 4 (error)"
+git revert HEAD~1
+# (HEAD~1 = el penúltimo commit, que es el #4 si contamos desde el actual)
+# Se abrirá tu editor. Guarda y cierra.
+git log --oneline
+# Verás un nuevo commit "Revert" al principio
+cat diario.txt
+# La línea 4 debería haber desaparecido
+
+# --- VIAJE 3: Reset soft del último commit ---
+echo "Línea extra para probar reset" >> diario.txt
+git add . && git commit -m "Commit que vamos a deshacer"
+git reset --soft HEAD~1
+git status
+# Los cambios están en staging (verde), el commit desapareció
+# Puedes hacer un nuevo commit con mejor mensaje o seguir editando
+
+# Si quieres descartar los cambios completamente:
+git restore --staged diario.txt
+# Saca los cambios del staging
+git restore diario.txt
+# Descarta los cambios del archivo
+```
+
+</details>
+
+---
+
+### Ejercicio 3: El Laboratorio de Ramas
+
+**Contexto:** Vas a simular el desarrollo de 3 features en paralelo, como si fueras un equipo de desarrollo.
+
+**Lo que practicarás:** `git switch -c`, `git merge`, resolución de conflictos, `git branch -d`
+
+**Requisitos:**
+- Crear una rama main con una base
+- Crear 3 ramas feature (header, contenido, footer)
+- Hacer commits en cada rama
+- Mergear en orden
+- Provocar y resolver un conflicto
+
+<details>
+<summary>Ver solución</summary>
+
+```bash
+# Crear proyecto base
+mkdir lab-ramas && cd lab-ramas
+git init
+
+# Crear archivo base
+cat > pagina.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <!-- Aquí va el header -->
+    <!-- Aquí va el contenido -->
+    <!-- Aquí va el footer -->
+</body>
+</html>
+EOF
+git add . && git commit -m "Crea estructura base de la página"
+
+# --- RAMA 1: feature/header ---
+git switch -c feature/header
+cat > pagina.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <header><h1>Mi Sitio Web</h1></header>
+    <!-- Aquí va el contenido -->
+    <!-- Aquí va el footer -->
+</body>
+</html>
+EOF
+git add . && git commit -m "Agrega header con título"
+
+# --- RAMA 2: feature/contenido ---
+git switch main
+git switch -c feature/contenido
+cat > pagina.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <!-- Aquí va el header -->
+    <main><p>Bienvenido a mi sitio web. Aquí encontrarás cosas geniales.</p></main>
+    <!-- Aquí va el footer -->
+</body>
+</html>
+EOF
+git add . && git commit -m "Agrega contenido principal"
+
+# --- RAMA 3: feature/footer ---
+git switch main
+git switch -c feature/footer
+cat > pagina.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <!-- Aquí va el header -->
+    <!-- Aquí va el contenido -->
+    <footer><p>© 2024 Mi Sitio</p></footer>
+</body>
+</html>
+EOF
+git add . && git commit -m "Agrega footer con copyright"
+
+# --- MERGE 1: header (limpio) ---
+git switch main
+git merge feature/header
+# Fast-forward, sin conflictos
+
+# --- MERGE 2: contenido (CONFLICTO) ---
+git merge feature/contenido
+# CONFLICT! Ambas ramas modificaron pagina.html
+
+# Resolver el conflicto: edita pagina.html manualmente
+# y deja el contenido combinado correctamente:
+cat > pagina.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <header><h1>Mi Sitio Web</h1></header>
+    <main><p>Bienvenido a mi sitio web. Aquí encontrarás cosas geniales.</p></main>
+    <!-- Aquí va el footer -->
+</body>
+</html>
+EOF
+git add pagina.html
+git commit -m "Resuelve conflicto: combina header y contenido"
+
+# --- MERGE 3: footer (CONFLICTO) ---
+git merge feature/footer
+# Otro conflicto, resolver igual:
+cat > pagina.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <header><h1>Mi Sitio Web</h1></header>
+    <main><p>Bienvenido a mi sitio web. Aquí encontrarás cosas geniales.</p></main>
+    <footer><p>© 2024 Mi Sitio</p></footer>
+</body>
+</html>
+EOF
+git add pagina.html
+git commit -m "Resuelve conflicto: agrega footer a la página completa"
+
+# --- LIMPIEZA ---
+git branch -d feature/header feature/contenido feature/footer
+git log --oneline
+# ¡Deberías ver todo el historial de merges!
+```
+
+</details>
+
+---
+
+### Ejercicio 4: Colaboración Simulada
+
+**Contexto:** Vas a simular trabajo en equipo usando GitHub. Clonarás el mismo repo en dos carpetas diferentes (como si fueran dos personas) y cada una creará cambios que se integrarán via Pull Request.
+
+**Lo que practicarás:** `git clone`, `git push`, Pull Requests, `git pull`
+
+**Requisitos:**
+- Crear un repo en GitHub
+- Clonarlo en 2 carpetas diferentes (simulando 2 personas)
+- Cada "persona" crea una rama, hace cambios, push y PR
+- Mergear ambos PRs
+- Actualizar ambas copias locales
+
+<details>
+<summary>Ver solución</summary>
+
+```bash
+# 1. Crear repo base y subirlo a GitHub
+mkdir proyecto-equipo && cd proyecto-equipo
+git init
+echo "# Proyecto del Equipo" > README.md
+echo "Lista de tareas:" > tareas.txt
+git add . && git commit -m "Crea proyecto base del equipo"
+
+# Crear repo en GitHub (nombre: proyecto-equipo, vacío)
+git remote add origin https://github.com/tu-usuario/proyecto-equipo.git
+git push -u origin main
+
+# 2. Simular dos personas clonando el repo
+cd ..
+git clone https://github.com/tu-usuario/proyecto-equipo.git persona-alice
+git clone https://github.com/tu-usuario/proyecto-equipo.git persona-bob
+
+# 3. Alice trabaja en su feature
+cd persona-alice
+git switch -c feature/alice-diseño
+echo "- [ ] Diseñar la página principal" >> tareas.txt
+echo "Alice estuvo aquí" > alice.txt
+git add . && git commit -m "Alice agrega tareas de diseño"
+git push -u origin feature/alice-diseño
+# Alice crea un PR desde GitHub
+
+# 4. Bob trabaja en su feature
+cd ../persona-bob
+git switch -c feature/bob-backend
+echo "- [ ] Crear la API REST" >> tareas.txt
+echo "Bob estuvo aquí" > bob.txt
+git add . && git commit -m "Bob agrega tareas de backend"
+git push -u origin feature/bob-backend
+# Bob crea un PR desde GitHub
+
+# 5. Mergear PRs desde GitHub (uno por uno)
+# Primero merge el PR de Alice
+# Luego merge el PR de Bob (puede tener conflicto en tareas.txt)
+
+# 6. Ambos actualizan su copia local
+cd ../persona-alice
+git switch main
+git pull
+
+cd ../persona-bob
+git switch main
+git pull
+
+# ¡Ambos tienen el mismo código actualizado!
+```
+
+</details>
+
+---
+
+### Ejercicio 5: Proyecto Integrador — Diario de Aprendizaje
+
+**Contexto:** Este es el ejercicio final. Vas a crear un proyecto que usa TODOS los conceptos del curso: init, commits, ramas, merge con conflicto, revert, push, Pull Request y limpieza.
+
+**Lo que practicarás:** Todo lo aprendido en los módulos 1-8.
+
+**Requisitos:**
+- Crear un repositorio con estructura profesional
+- Crear un archivo `.gitignore`
+- Usar ramas para cada sección del diario
+- Mergear con al menos un conflicto
+- Revertir un "error"
+- Subir a GitHub
+- Crear y mergear un Pull Request
+- Limpieza final de ramas
+
+<details>
+<summary>Ver solución</summary>
+
+```bash
+# ===== FASE 1: Crear el proyecto =====
+mkdir diario-aprendizaje && cd diario-aprendizaje
+git init
+
+# Crear .gitignore
+cat > .gitignore << 'EOF'
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Carpeta de notas privadas
+privado/
+EOF
+
+# Crear estructura
+mkdir entradas recursos
+echo "# Diario de Aprendizaje Git" > README.md
+echo "Un diario personal donde documento mi viaje aprendiendo Git." >> README.md
+
+git add . && git commit -m "Crea estructura base del diario con .gitignore"
+
+# ===== FASE 2: Ramas para cada sección =====
+
+# --- Rama: entrada del día 1 ---
+git switch -c entrada/dia-1
+cat > entradas/dia-01.md << 'EOF'
+# Día 1: Primeros pasos con Git
+
+Hoy aprendí qué es Git y cómo configurarlo.
+Git es como una máquina del tiempo para mi código.
+
+## Comandos aprendidos
+- git init
+- git config
+- git status
+EOF
+git add . && git commit -m "Agrega entrada del día 1: primeros pasos"
+git switch main
+git merge entrada/dia-1
+git branch -d entrada/dia-1
+
+# --- Rama: entrada del día 2 ---
+git switch -c entrada/dia-2
+cat > entradas/dia-02.md << 'EOF'
+# Día 2: Commits y el flujo básico
+
+Hoy practiqué el flujo add-commit.
+Es como preparar una foto y tomarla.
+
+## Comandos aprendidos
+- git add
+- git commit
+- git log
+EOF
+git add . && git commit -m "Agrega entrada del día 2: commits"
+
+# También actualizar README desde esta rama
+echo "" >> README.md
+echo "## Entradas" >> README.md
+echo "- Día 1: Primeros pasos" >> README.md
+echo "- Día 2: Commits" >> README.md
+git add . && git commit -m "Actualiza README con lista de entradas"
+git switch main
+
+# --- Provocar un conflicto en README ---
+echo "" >> README.md
+echo "## Notas" >> README.md
+echo "Este diario lo empecé en el curso de Git." >> README.md
+git add . && git commit -m "Agrega sección de notas al README"
+
+# Merge con conflicto
+git merge entrada/dia-2
+# CONFLICT en README.md
+
+# Resolver: combinar ambos cambios
+cat > README.md << 'EOF'
+# Diario de Aprendizaje Git
+Un diario personal donde documento mi viaje aprendiendo Git.
+
+## Entradas
+- Día 1: Primeros pasos
+- Día 2: Commits
+
+## Notas
+Este diario lo empecé en el curso de Git.
+EOF
+git add README.md
+git commit -m "Resuelve conflicto: combina entradas y notas en README"
+git branch -d entrada/dia-2
+
+# ===== FASE 3: Simular un error y revertirlo =====
+echo "ESTO ES UN ERROR TERRIBLE QUE NO DEBERÍA ESTAR AQUÍ" >> README.md
+git add . && git commit -m "Agrega texto incorrecto al README"
+
+# Revertir el error
+git revert HEAD --no-edit
+git log --oneline
+# Verás el commit de revert
+
+# ===== FASE 4: Subir a GitHub =====
+# Crear repo en GitHub: diario-aprendizaje (vacío)
+git remote add origin https://github.com/tu-usuario/diario-aprendizaje.git
+git push -u origin main
+
+# ===== FASE 5: Pull Request workflow =====
+git switch -c entrada/dia-3
+cat > entradas/dia-03.md << 'EOF'
+# Día 3: Ramas y GitHub
+
+Hoy aprendí sobre ramas y Pull Requests.
+Las ramas son como universos paralelos.
+
+## Comandos aprendidos
+- git switch -c
+- git merge
+- git push
+- git pull
+EOF
+
+echo "- Día 3: Ramas y GitHub" >> README.md
+git add . && git commit -m "Agrega entrada del día 3: ramas y GitHub"
+git push -u origin entrada/dia-3
+
+# Crear PR desde GitHub, revisarlo y mergearlo
+
+# ===== FASE 6: Limpieza final =====
+git switch main
+git pull
+git branch -d entrada/dia-3
+
+# Verificar que todo está limpio
+git status
+git branch
+git log --oneline
+# ¡Proyecto completo con historial profesional!
+```
+
+</details>
+
+---
+
+<Callout type="info" title="¡Felicidades, completaste el curso!">
+  Si llegaste hasta aquí y completaste los ejercicios, ya tienes las habilidades fundamentales para usar Git y GitHub en proyectos reales. Recuerda:
+
+  - **Practica regularmente**: Usa Git en todos tus proyectos, aunque sean pequeños
+  - **No tengas miedo de equivocarte**: Git está diseñado para que puedas corregir errores
+  - **Consulta la documentación**: `git help <comando>` es tu amigo
+  - **Colabora**: La mejor forma de aprender es trabajando con otras personas
+
+  ¡Sigue practicando y feliz codificación!
+</Callout>
