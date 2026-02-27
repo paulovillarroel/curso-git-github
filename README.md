@@ -2,7 +2,7 @@
 
 Curso interactivo para principiantes que cubre desde la configuración inicial hasta flujos de trabajo colaborativos profesionales con GitHub.
 
-**[Ver el curso en vivo](https://paulovillarroel.github.io/curso-git-github/)**
+**[Ir al curso](https://paulovillarroel.github.io/curso-git-github/)**
 
 ## Contenido
 
