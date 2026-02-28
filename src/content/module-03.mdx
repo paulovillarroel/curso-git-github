@@ -242,42 +242,65 @@ mkdir mi-receta && cd mi-receta
 # 2. Activar Git
 git init
 
-# 3. Crear el primer archivo
+# 3. Crear .gitignore (siempre hazlo antes de tu primer commit)
+cat > .gitignore << 'EOF'
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos con datos sensibles
+.env
+
+# Carpetas de dependencias
+node_modules/
+
+# Archivos temporales
+*.tmp
+*.log
+EOF
+
+# 4. Crear el primer archivo
 echo "# Receta de Pasta" > receta.txt
 
-# 4. Ver el estado (archivo en rojo, sin seguimiento)
+# 5. Ver el estado (archivos en rojo, sin seguimiento)
 git status
 
-# 5. Preparar el archivo para la foto
-git add receta.txt
+# 6. Preparar los archivos para la foto
+git add .gitignore receta.txt
 
-# 6. Ver el estado (archivo en verde, listo)
+# 7. Ver el estado (archivos en verde, listos)
 git status
 
-# 7. Tomar la foto (hacer commit)
-git commit -m "Agrega receta inicial de pasta"
+# 8. Tomar la foto (hacer commit)
+git commit -m "Agrega receta inicial y .gitignore"
 
-# 8. Agregar más contenido
+# 9. Agregar más contenido
 echo "" >> receta.txt
 echo "## Ingredientes" >> receta.txt
 echo "- 500g de pasta" >> receta.txt
 echo "- 1 lata de tomate" >> receta.txt
 echo "- Sal y pimienta" >> receta.txt
 
-# 9. Ver qué cambió
+# 10. Ver qué cambió
 git diff
 
-# 10. Preparar y tomar otra foto
+# 11. Preparar y tomar otra foto
 git add receta.txt
 git commit -m "Agrega lista de ingredientes"
 
-# 11. Ver el álbum de fotos
+# 12. Ver el álbum de fotos
 git log --oneline
 # b2c3d4e Agrega lista de ingredientes
-# a1b2c3d Agrega receta inicial de pasta
+# a1b2c3d Agrega receta inicial y .gitignore
 ```
 
+¿Ves que el `.gitignore` fue parte del primer commit? Así cualquier archivo temporal o sensible queda excluido desde el inicio (revisa la sección de `.gitignore` más arriba para entender cada línea).
+
 ¡Acabas de crear un proyecto con dos commits! Tienes dos "fotos" guardadas de tu proyecto. Podrías volver a cualquiera de ellas en cualquier momento (lo veremos en el módulo siguiente).
+
+<Callout type="info" title="¿Y cómo comparto esto con el mundo?">
+  Todo lo que acabas de hacer vive **solo en tu computador**. Si tu disco duro muere mañana, pierdes todo. En el **Módulo 6** aprenderás a subir tu proyecto a GitHub para tener un respaldo en la nube y poder compartirlo con otras personas.
+</Callout>
 
 ---
 

@@ -20,6 +20,21 @@ Por eso existe el flujo con **Pull Requests** (PR): cada cambio pasa por una rev
 
 ---
 
+### Dos caminos para contribuir a un proyecto
+
+Antes de ver el flujo completo, es importante entender que existen **dos caminos** para contribuir, y cuál uses depende de tus permisos en el repositorio:
+
+| | Como miembro del equipo | Como contribuidor externo |
+|---|---|---|
+| **¿Cuándo?** | Tienes permisos de escritura en el repo | No tienes permisos (proyecto open source, repo ajeno) |
+| **Primer paso** | `git clone` del repo | Fork en GitHub, luego `git clone` de tu fork |
+| **¿Dónde haces push?** | Directamente al repo original | A tu fork |
+| **¿Cómo llegan tus cambios?** | PR dentro del mismo repo | PR desde tu fork al repo original |
+
+En este módulo veremos primero el **camino de equipo** paso a paso. Al final verás el **camino de contribuidor externo**, que es casi idéntico: la única diferencia es que primero haces fork (como aprendiste en el Módulo 6) y el PR va desde tu fork al repo original.
+
+---
+
 ### El flujo GitHub Flow
 
 Este es el proceso completo que seguirás en tu trabajo:
@@ -206,6 +221,49 @@ git branch -d feature/agregar-footer
 | Actualizar local | Terminal | `git switch main` + `git pull` |
 | Limpieza | Terminal | `git branch -d feature/nombre` |
 
+</Callout>
+
+---
+
+### Contribuir a un proyecto ajeno (via fork)
+
+Si no tienes permisos de escritura en un repositorio (por ejemplo, un proyecto open source), el flujo es el mismo que viste arriba, pero con un paso previo: **hacer fork**. Aquí va el ejemplo completo:
+
+```bash
+# 1. Fork en GitHub (botón "Fork" en el repo original)
+#    Esto crea una copia en github.com/tu-usuario/proyecto-ajeno
+
+# 2. Clonar TU fork (no el repo original)
+git clone https://github.com/tu-usuario/proyecto-ajeno.git
+cd proyecto-ajeno
+
+# 3. Agregar referencia al repo original (para mantener tu fork actualizado)
+git remote add upstream https://github.com/autor/proyecto-ajeno.git
+
+# 4. Crear rama para tu contribución
+git switch -c fix/corregir-typo
+
+# 5. Hacer tus cambios, add y commit
+echo "Corrección" >> archivo.txt
+git add archivo.txt
+git commit -m "Corrige typo en documentación"
+
+# 6. Subir la rama a TU fork
+git push -u origin fix/corregir-typo
+
+# 7. Ir a GitHub → crear Pull Request
+#    GitHub detecta tu rama y te ofrece crear un PR
+#    El PR va desde tu-usuario/proyecto-ajeno (fix/corregir-typo)
+#    hacia autor/proyecto-ajeno (main)
+```
+
+<Callout type="tip" title="¿Cuál es la diferencia con el flujo de equipo?">
+  Solo dos cosas cambian:
+
+  1. **Antes de clonar**, haces fork del repo original
+  2. **El PR cruza repositorios**: va desde tu fork hacia el repo original
+
+  Todo lo demás (crear rama, commits, push, crear PR) es exactamente igual.
 </Callout>
 
 ---
