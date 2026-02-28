@@ -33,13 +33,13 @@ Después de ejecutar esto, es como si el último commit nunca hubiera existido. 
 
 ---
 
-### `git rebase` — Otra forma de integrar cambios
+### `git rebase` — Integrar cambios con historia lineal
 
-Merge no es la única forma de integrar cambios entre ramas. Existe otra herramienta llamada **rebase** que logra lo mismo, pero de una forma diferente.
+En el Módulo 7 viste las tres estrategias de merge (squash, merge commit, rebase). Ahora vas a aprender a usar **rebase** desde la terminal.
 
-La diferencia clave es **cómo queda la historia**:
+La diferencia clave con merge es **cómo queda la historia**:
 
-- **Merge** crea un "nudo" en la historia: un commit especial de merge que une las dos ramas
+- **Merge** crea un commit de merge que une las dos ramas
 - **Rebase** "reescribe" la historia para que sea **lineal**, como si hubieras hecho tus cambios después de todo lo que pasó en main
 
 ```
@@ -243,7 +243,7 @@ git pull
 # Pull con rebase (fetch + rebase, historia lineal)
 git pull --rebase origin main
 
-# Forzar commit de merge explícito (incluso si no hay conflictos)
+# Forzar commit de merge explícito (incluso cuando fast-forward es posible)
 git pull --no-ff
 
 # Forzar merge aunque tu config global diga rebase
@@ -258,7 +258,7 @@ git pull --ff-only
   - `git pull --rebase`: cuando quieres mantener la historia lineal
   - `git pull --no-rebase`: cuando configuraste rebase por defecto pero para un caso puntual quieres merge
   - `git pull --ff-only`: el más seguro — si tu historial local divergió del remoto, **falla** en vez de intentar fusionar. Así evitas commits de merge accidentales y decides tú cómo resolver la situación
-  - `git pull --no-ff`: cuando quieres dejar registro explícito de que se integraron cambios externos, aunque no haya conflictos
+  - `git pull --no-ff`: cuando quieres dejar registro explícito de que se integraron cambios externos, incluso cuando un fast-forward sería posible
 </Callout>
 
 <Callout type="warning" title="Siempre haz commit antes de pull">

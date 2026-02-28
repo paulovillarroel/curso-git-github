@@ -114,6 +114,41 @@ git commit -m "Agrega ingredientes"
 
 ---
 
+### `git stash` — Guardar cambios en un cajón temporal
+
+Imagina que estás trabajando en algo y de repente necesitas cambiar de rama urgentemente (un compañero te pide revisar algo, o descubriste un bug en `main`). Pero tus cambios actuales están a medio hacer — no quieres hacer un commit de algo incompleto.
+
+`git stash` guarda tus cambios en un "cajón temporal" y deja tu carpeta limpia:
+
+```bash
+# Tienes cambios sin commitear
+git status
+# modified: archivo.txt
+
+# Guardar los cambios en el cajón
+git stash
+# Saved working directory and index state WIP on main
+
+# Ahora tu carpeta está limpia
+git status
+# nothing to commit, working tree clean
+
+# Puedes cambiar de rama tranquilo
+git switch otra-rama
+# ... hacer lo que necesitas ...
+git switch main
+
+# Recuperar tus cambios del cajón
+git stash pop
+# Tus cambios están de vuelta, como si nada hubiera pasado
+```
+
+<Callout type="tip" title="¿Cuándo usar stash?">
+  Úsalo cuando necesitas cambiar de rama pero tienes cambios sin commitear. Es temporal — guarda, haz lo que necesitas, y recupera con `pop`. Si no estás seguro de querer recuperarlos, usa `git stash apply` (que los recupera pero los deja también en el cajón por si acaso).
+</Callout>
+
+---
+
 ### Tabla resumen
 
 <CommandTable commands={[
@@ -122,6 +157,8 @@ git commit -m "Agrega ingredientes"
   { command: "git switch main", description: "Volver al presente" },
   { command: "git revert <hash>", description: "Deshacer un commit de forma segura (crea nuevo commit)" },
   { command: "git reset --soft HEAD~1", description: "Deshacer el último commit, archivos quedan en staging" },
+  { command: "git stash", description: "Guardar cambios temporalmente en un cajón" },
+  { command: "git stash pop", description: "Recuperar los cambios guardados con stash" },
 ]} />
 
 | Comando | ¿Es seguro? | ¿Cuándo usarlo? |
@@ -129,6 +166,7 @@ git commit -m "Agrega ingredientes"
 | `git switch --detach` | Sí, para explorar | Para visitar el pasado (los commits que hagas aquí se pierden si no creas una rama) |
 | `git revert` | Sí, es la opción recomendada | Para deshacer un cambio manteniendo la historia |
 | `git reset --soft` | Sí, los archivos no se pierden | Para corregir un mensaje de commit o agregar archivos olvidados |
+| `git stash` / `git stash pop` | Sí, es temporal y reversible | Para guardar cambios sin commitear cuando necesitas cambiar de rama |
 
 ---
 

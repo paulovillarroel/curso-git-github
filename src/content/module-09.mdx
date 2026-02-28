@@ -1,226 +1,13 @@
 import Callout from '../components/Callout.astro';
 import CommandTable from '../components/CommandTable.astro';
 
-## Tu copiloto en la terminal: GitHub CLI y agentes de IA
+## Agentes de IA: tu asistente experto en la terminal
 
-Hasta ahora has usado Git escribiendo cada comando a mano. Pero hay una herramienta que hace tu vida mucho más fácil: **GitHub CLI** (`gh`). Y cuando la combinas con **agentes de IA** en la terminal, tu productividad se multiplica.
-
-Piensa en GitHub CLI como un control remoto para GitHub: en vez de ir al navegador para crear un PR, lo haces directo desde la terminal. Y los agentes de IA son como un compañero experto sentado a tu lado, que puedes consultar en cualquier momento.
-
----
-
-### ¿Qué es GitHub CLI?
-
-GitHub CLI (`gh`) es la herramienta oficial de GitHub para interactuar con la plataforma desde la terminal. Te permite hacer casi todo lo que harías en el navegador, pero sin salir de la línea de comandos.
-
-**¿Por qué es útil?**
-- No necesitas cambiar entre terminal y navegador constantemente
-- Es más rápido para tareas repetitivas
-- Se integra perfectamente con tu flujo de Git
-- Los agentes de IA pueden usarla directamente
-
----
-
-### Instalación de GitHub CLI
-
-<Callout type="tip" title="WSL / Ubuntu 24.04 / Linux">
-  En Ubuntu 24.04 y versiones recientes, `gh` suele estar disponible directamente:
-
-  ```bash
-  sudo apt update
-  sudo apt install gh
-  ```
-
-  Si el paquete no se encuentra, necesitas agregar el repositorio oficial de GitHub CLI primero. Revisa las instrucciones en el Módulo 4 o en [cli.github.com](https://cli.github.com/).
+<Callout type="info" title="Módulo bonus — opcional">
+  Este módulo es complementario. Los agentes de IA son herramientas poderosas pero opcionales, que requieren cuentas o API keys adicionales. Todo lo que necesitas para trabajar profesionalmente con Git ya lo aprendiste en los módulos anteriores.
 </Callout>
 
-<Callout type="tip" title="macOS">
-  ```bash
-  brew install gh
-  ```
-</Callout>
-
-Verifica que se instaló:
-
-```bash
-gh --version
-# gh version 2.x.x (la versión que sea)
-```
-
----
-
-### Autenticación
-
-Lo primero es conectar `gh` con tu cuenta de GitHub:
-
-```bash
-gh auth login
-```
-
-Te hará algunas preguntas:
-
-```bash
-# ? What account do you want to log into?
-#   > GitHub.com
-# ? What is your preferred protocol for Git operations on this host?
-#   > HTTPS
-# ? Authenticate Git with your GitHub credentials?
-#   > Yes
-# ? How would you like to authenticate GitHub CLI?
-#   > Login with a web browser
-```
-
-Se abrirá tu navegador para autorizar. Sigue las instrucciones y listo. Una vez autenticado, no necesitas tokens ni contraseñas para nada más.
-
-<Callout type="info" title="Una vez y listo">
-  `gh auth login` también configura las credenciales de Git, así que no necesitas configurar tokens por separado. Es la forma más fácil de autenticarte para todo.
-</Callout>
-
-Para verificar que estás autenticado:
-
-```bash
-gh auth status
-# github.com
-#   ✓ Logged in to github.com account tu-usuario
-```
-
----
-
-### Crear repositorios desde la terminal
-
-En vez de ir al navegador:
-
-```bash
-# Crear un repo público desde la carpeta actual
-gh repo create mi-proyecto --public --source=. --push
-
-# ¿Qué hace cada flag?
-# --public: el repo será público (usa --private para privado)
-# --source=.: usa la carpeta actual como código fuente
-# --push: sube el código automáticamente
-```
-
-Esto hace en un solo comando lo que antes requería: ir a GitHub → crear repo → copiar URL → `git remote add` → `git push`. Todo junto.
-
-```bash
-# Crear un repo y clonarlo (proyecto nuevo desde cero)
-gh repo create mi-nuevo-proyecto --public --clone
-cd mi-nuevo-proyecto
-```
-
----
-
-### Pull Requests desde la terminal
-
-Recuerda el Módulo 7: crear un PR requería ir al navegador. Con `gh` lo haces directo:
-
-```bash
-# Crear un Pull Request
-gh pr create --title "Agrega nueva funcionalidad" --body "Descripción de los cambios"
-
-# Si no pasas título ni body, se abre un editor interactivo:
-gh pr create
-```
-
-Ver tus Pull Requests:
-
-```bash
-# Listar PRs abiertos
-gh pr list
-
-# Ver detalles de un PR específico
-gh pr view 1
-# (donde 1 es el número del PR)
-
-# Ver el PR del branch actual
-gh pr view
-```
-
-Revisar y mergear PRs:
-
-```bash
-# Ver los cambios de un PR (como el diff)
-gh pr diff 1
-
-# Mergear un PR desde la terminal
-gh pr merge 1 --merge
-# --merge: merge commit (como el botón verde de GitHub)
-# --squash: combina commits en uno
-# --rebase: rebase merge
-```
-
-<Callout type="tip" title="Flujo profesional acelerado">
-  Con `gh`, el flujo del Módulo 7 se reduce a:
-
-  ```bash
-  git switch -c feature/mi-cambio
-  # ... hacer cambios, commits ...
-  git push -u origin feature/mi-cambio
-  gh pr create --title "Mi cambio" --body "Descripción"
-  # ... esperar revisión ...
-  gh pr merge --merge
-  git switch main && git pull
-  ```
-
-  Todo sin salir de la terminal.
-</Callout>
-
----
-
-### Gestión de issues
-
-Los **issues** son como tickets de trabajo en GitHub. Con `gh` puedes gestionarlos directamente:
-
-```bash
-# Listar issues abiertos
-gh issue list
-
-# Crear un issue
-gh issue create --title "Bug: el botón no funciona" --body "Al hacer clic no pasa nada"
-
-# Ver un issue
-gh issue view 5
-
-# Cerrar un issue
-gh issue close 5
-```
-
----
-
-### Ver el estado de tu repositorio
-
-```bash
-# Resumen general del repo (PRs, issues, etc.)
-gh repo view
-
-# Ver en el navegador (abre GitHub automáticamente)
-gh repo view --web
-
-# Ver el estado de los checks/CI de tu PR
-gh pr checks
-```
-
----
-
-### Tabla resumen de GitHub CLI
-
-<CommandTable commands={[
-  { command: "gh auth login", description: "Autenticarte con GitHub" },
-  { command: "gh repo create nombre --public --source=. --push", description: "Crear repo y subir código" },
-  { command: "gh pr create --title \"...\" --body \"...\"", description: "Crear un Pull Request" },
-  { command: "gh pr list", description: "Listar Pull Requests abiertos" },
-  { command: "gh pr view", description: "Ver detalles del PR actual" },
-  { command: "gh pr merge --merge", description: "Mergear un PR" },
-  { command: "gh issue list", description: "Listar issues abiertos" },
-  { command: "gh issue create --title \"...\"", description: "Crear un issue" },
-  { command: "gh repo view --web", description: "Abrir el repo en el navegador" },
-]} />
-
----
-
-### Agentes de IA en la terminal
-
-Ahora viene la parte más poderosa: los **agentes de IA** que funcionan directamente en tu terminal. Estos asistentes entienden tu código, pueden ejecutar comandos, crear archivos y ayudarte con Git y GitHub.
+Los **agentes de IA** son asistentes que funcionan directamente en tu terminal. Entienden tu código, pueden ejecutar comandos de Git y `gh`, crear archivos, hacer commits y hasta crear Pull Requests — todo con instrucciones en lenguaje natural.
 
 Piensa en ellos como un programador senior sentado a tu lado, disponible 24/7, al que le puedes preguntar cualquier cosa.
 
@@ -324,16 +111,16 @@ gh copilot explain "git rebase -i HEAD~3"
 
 ---
 
-### Ejemplo práctico: flujo completo con gh y agente de IA
+### Ejemplo práctico: flujo con un agente de IA
 
-Así se ve un flujo de trabajo real combinando `gh` y un agente de IA:
+Así se ve un flujo de trabajo combinando `gh` (que aprendiste en el Módulo 7) y un agente de IA:
 
 ```bash
-# 1. Crear un proyecto nuevo (con gh)
+# 1. Crear un proyecto nuevo
 mkdir mi-app && cd mi-app
 git init
 echo "# Mi App" > README.md
-git add . && git commit -m "Commit inicial"
+git add . && git commit -m "chore: commit inicial"
 gh repo create mi-app --public --source=. --push
 
 # 2. Iniciar tu agente de IA
@@ -347,64 +134,18 @@ claude  # o gemini, según tu preferencia
 
 # 4. Revisar y mergear
 gh pr view
-gh pr merge --merge
+gh pr merge --squash
 
 # 5. Actualizar local
 git switch main
 git pull
 ```
 
-Lo que antes tomaba 15-20 comandos manuales, ahora es una conversación natural con tu agente de IA.
-
 ---
 
 ### Ejercicios del módulo
 
-**Ejercicio 1:** Instala GitHub CLI y autentícate:
-
-```bash
-# Instalar (elige tu sistema operativo)
-sudo apt update && sudo apt install gh   # WSL/Linux
-brew install gh                          # macOS
-
-# Autenticarte
-gh auth login
-gh auth status
-```
-
-**Ejercicio 2:** Crea un repositorio desde la terminal usando `gh`:
-
-```bash
-mkdir prueba-gh && cd prueba-gh
-git init
-echo "# Creado con gh" > README.md
-git add . && git commit -m "Commit inicial"
-gh repo create prueba-gh --public --source=. --push
-```
-
-Ve a GitHub en tu navegador y verifica que el repo existe.
-
-**Ejercicio 3:** Crea un PR completo desde la terminal:
-
-```bash
-git switch -c feature/prueba-cli
-echo "Archivo creado desde la CLI" > prueba.txt
-git add . && git commit -m "Agrega archivo de prueba"
-git push -u origin feature/prueba-cli
-gh pr create --title "Prueba de GitHub CLI" --body "PR creado sin salir de la terminal"
-gh pr view
-```
-
-**Ejercicio 4:** Mergea el PR y limpia:
-
-```bash
-gh pr merge --merge
-git switch main
-git pull
-git branch -d feature/prueba-cli
-```
-
-**Ejercicio 5 (Exploración):** Si te interesa, instala uno de los agentes de IA y pruébalo en un proyecto de Git:
+**Ejercicio 1 (Exploración):** Si te interesa, instala uno de los agentes de IA y pruébalo en un proyecto de Git:
 
 ```bash
 # Opción A: Claude Code
@@ -420,8 +161,14 @@ gemini
 
 Prueba pedirle: "Muéstrame el estado de Git de este proyecto" o "Haz commit de mis cambios con un buen mensaje".
 
-<Callout type="info" title="La terminal es tu centro de comando">
-  Con `gh` y un agente de IA, tu terminal se convierte en el centro de toda tu productividad. No necesitas cambiar entre ventanas, recordar comandos exactos ni buscar en documentación. Solo describe lo que quieres hacer y deja que las herramientas trabajen por ti.
+**Ejercicio 2:** Si instalaste un agente, prueba un flujo completo:
 
-  Eso sí, **primero aprende los fundamentos** (los módulos 1 al 7 de este curso). Entender qué hace cada comando es esencial para poder verificar que las herramientas están haciendo lo correcto.
+```bash
+# Inicia el agente en un proyecto con Git
+# Pídele que cree una rama, haga cambios, commit y PR
+# Verifica que los commits sigan Conventional Commits
+```
+
+<Callout type="info" title="Primero los fundamentos, después las herramientas">
+  Los agentes de IA son aceleradores, no reemplazos. **Primero aprende los fundamentos** (los módulos 1 al 8 de este curso). Entender qué hace cada comando es esencial para poder verificar que las herramientas están haciendo lo correcto. Un agente que hace cosas que no entiendes es un riesgo, no una ayuda.
 </Callout>

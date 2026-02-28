@@ -31,7 +31,7 @@ Antes de ver el flujo completo, es importante entender que existen **dos caminos
 | **¿Dónde haces push?** | Directamente al repo original | A tu fork |
 | **¿Cómo llegan tus cambios?** | PR dentro del mismo repo | PR desde tu fork al repo original |
 
-En este módulo veremos primero el **camino de equipo** paso a paso. Al final verás el **camino de contribuidor externo**, que es casi idéntico: la única diferencia es que primero haces fork (como aprenderás en el Módulo 8) y el PR va desde tu fork al repo original.
+En este módulo veremos primero el **camino de equipo** paso a paso. Al final verás el **camino de contribuidor externo**, que es casi idéntico: la única diferencia es que primero haces fork (lo verás en detalle en el Módulo 8) y el PR va desde tu fork al repo original.
 
 ---
 
@@ -141,12 +141,27 @@ Una vez que el PR está aprobado, es hora del **merge**. En GitHub verás un bot
 - **"Merge pull request"**: Haz clic aquí
 - **"Confirm merge"**: Confirma
 
-GitHub te dará tres opciones de merge:
-1. **Create a merge commit** (recomendado para principiantes): crea un commit de merge que une todo
-2. **Squash and merge**: combina todos tus commits en uno solo
-3. **Rebase and merge**: reescribe la historia (más avanzado)
+GitHub te dará tres opciones de merge. Entender la diferencia es importante:
 
-Para empezar, usa **"Create a merge commit"**. Es la más simple y mantiene toda la historia.
+| Estrategia | Qué hace | Resultado en `main` |
+|-----------|----------|---------------------|
+| **Squash and merge** | Combina todos tus commits en **uno solo** | Un commit limpio por tarea |
+| **Create a merge commit** | Mantiene todos los commits + agrega commit de merge | Historial completo pero más ruidoso |
+| **Rebase and merge** | Re-aplica cada commit sobre main (sin commit de merge) | Lineal, pero cada commit individual se mantiene |
+
+**Nuestra recomendación: usa "Squash and merge"** como default. Cada commit en `main` debería representar una tarea completa, no 15 commits intermedios como "WIP", "fix typo", "ahora sí funciona". Con squash, tus commits de trabajo se combinan en uno limpio con el título del PR como mensaje.
+
+```
+# Sin squash (todos los commits de la rama llegan a main):
+main: ... → WIP → fix typo → ahora sí → merge commit
+
+# Con squash (un solo commit limpio):
+main: ... → feat: agrega filtro de búsqueda
+```
+
+<Callout type="tip" title="¿Cuándo NO usar squash?">
+  Si cada commit en tu rama es intencional y significativo (no hay WIP ni correcciones intermedias), puedes usar "Rebase and merge" para mantener esa granularidad en `main`. Pero para la mayoría de equipos, squash es el default correcto.
+</Callout>
 
 Después del merge, GitHub te dará la opción de borrar la rama remota. ¡Hazlo! Ya cumplió su propósito.
 
@@ -227,43 +242,88 @@ git branch -d feature/agregar-footer
 
 ### Contribuir a un proyecto ajeno (via fork)
 
-Si no tienes permisos de escritura en un repositorio (por ejemplo, un proyecto open source), el flujo es el mismo que viste arriba, pero con un paso previo: **hacer fork**. Aquí va el ejemplo completo:
+Si no tienes permisos de escritura en un repositorio (por ejemplo, un proyecto open source), el flujo es casi idéntico al de equipo, pero con un paso previo: necesitas hacer **fork** del proyecto. Un fork crea una copia del repositorio en **tu cuenta** de GitHub, donde sí tienes permisos para hacer push.
+
+La explicación completa de fork (cómo hacerlo, cómo mantenerlo actualizado, cuándo usarlo vs clone) la verás en el **Módulo 8**. Por ahora, lo importante es entender la diferencia:
+
+| | Como miembro del equipo | Como contribuidor externo |
+|---|---|---|
+| **Primer paso** | `git clone` del repo | Fork en GitHub → `git clone` de tu fork |
+| **Push va a** | El repo del equipo | Tu fork |
+| **PR va** | Dentro del mismo repo | Desde tu fork al repo original |
+
+Todo lo demás (crear rama, commits, push, crear PR) es exactamente igual.
+
+---
+
+### GitHub CLI (`gh`) — El flujo profesional sin salir de la terminal
+
+Hasta ahora, para crear un PR tenías que ir al navegador. **GitHub CLI** (`gh`) te permite hacer todo desde la terminal: crear PRs, revisarlos, mergearlos, gestionar issues y más.
+
+Si todavía no instalaste `gh`, hazlo ahora (ya lo usaste para autenticarte en el Módulo 4):
 
 ```bash
-# 1. Fork en GitHub (botón "Fork" en el repo original)
-#    Esto crea una copia en github.com/tu-usuario/proyecto-ajeno
-
-# 2. Clonar TU fork (no el repo original)
-git clone https://github.com/tu-usuario/proyecto-ajeno.git
-cd proyecto-ajeno
-
-# 3. Agregar referencia al repo original (para mantener tu fork actualizado)
-git remote add upstream https://github.com/autor/proyecto-ajeno.git
-
-# 4. Crear rama para tu contribución
-git switch -c fix/corregir-typo
-
-# 5. Hacer tus cambios, add y commit
-echo "Corrección" >> archivo.txt
-git add archivo.txt
-git commit -m "Corrige typo en documentación"
-
-# 6. Subir la rama a TU fork
-git push -u origin fix/corregir-typo
-
-# 7. Ir a GitHub → crear Pull Request
-#    GitHub detecta tu rama y te ofrece crear un PR
-#    El PR va desde tu-usuario/proyecto-ajeno (fix/corregir-typo)
-#    hacia autor/proyecto-ajeno (main)
+# Verificar que está instalado y autenticado
+gh auth status
+# ✓ Logged in to github.com account tu-usuario
 ```
 
-<Callout type="tip" title="¿Cuál es la diferencia con el flujo de equipo?">
-  Solo dos cosas cambian:
+**Crear un PR desde la terminal:**
 
-  1. **Antes de clonar**, haces fork del repo original
-  2. **El PR cruza repositorios**: va desde tu fork hacia el repo original
+```bash
+# Después de hacer push de tu rama
+gh pr create --title "feat: agrega filtro de búsqueda" --body "Descripción de los cambios"
 
-  Todo lo demás (crear rama, commits, push, crear PR) es exactamente igual.
+# Si prefieres que se abra un editor interactivo:
+gh pr create
+```
+
+**Ver y mergear PRs:**
+
+```bash
+# Listar PRs abiertos
+gh pr list
+
+# Ver detalles del PR actual
+gh pr view
+
+# Ver los cambios (diff)
+gh pr diff 1
+
+# Mergear con squash (nuestra recomendación)
+gh pr merge --squash
+```
+
+**Crear repositorios desde la terminal:**
+
+```bash
+# Crear repo público desde la carpeta actual
+gh repo create mi-proyecto --public --source=. --push
+# Esto reemplaza: ir a GitHub → crear repo → copiar URL → git remote add → git push
+```
+
+**Gestionar issues:**
+
+```bash
+gh issue list                    # Listar issues abiertos
+gh issue create --title "..."    # Crear un issue
+gh issue view 5                  # Ver un issue
+gh issue close 5                 # Cerrar un issue
+```
+
+<Callout type="tip" title="Flujo profesional acelerado con gh">
+  Con `gh`, el flujo completo se queda en la terminal:
+
+  ```bash
+  git switch -c feature/mi-cambio
+  # ... hacer cambios, commits ...
+  git push -u origin feature/mi-cambio
+  gh pr create --title "feat: mi cambio" --body "Descripción"
+  # ... esperar revisión ...
+  gh pr merge --squash
+  git switch main && git pull
+  git branch -d feature/mi-cambio
+  ```
 </Callout>
 
 ---
@@ -277,6 +337,11 @@ git push -u origin fix/corregir-typo
   { command: "git switch main", description: "Volver a la rama principal" },
   { command: "git pull", description: "Actualizar main con los cambios de GitHub" },
   { command: "git branch -d feature/nombre", description: "Borrar rama local después del merge" },
+  { command: "gh pr create --title \"...\" --body \"...\"", description: "Crear un Pull Request desde la terminal" },
+  { command: "gh pr list", description: "Listar Pull Requests abiertos" },
+  { command: "gh pr merge --squash", description: "Mergear PR con squash" },
+  { command: "gh issue list", description: "Listar issues abiertos" },
+  { command: "gh repo create nombre --public --source=. --push", description: "Crear repo y subir código" },
 ]} />
 
 ---

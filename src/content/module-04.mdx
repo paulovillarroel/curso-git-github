@@ -92,25 +92,8 @@ Para que Git pueda subir código a GitHub, necesitas autenticarte. La forma más
   Si instalaste la **app de GitHub** en tu teléfono, la autorización te llega como notificación — solo aprueba desde ahí y listo.
 </Callout>
 
-<Callout type="info" title="Alternativa: Token personal (HTTPS)">
-  Si prefieres no instalar `gh`, puedes crear un token personal:
-
-  1. En GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
-  2. "Generate new token (classic)"
-  3. Dale un nombre, selecciona el permiso `repo`, y genera el token
-  4. **Copia el token** (solo lo ves una vez)
-  5. Cuando Git te pida contraseña, usa el token en vez de tu contraseña
-
-  También puedes guardar el token para no tenerlo que poner cada vez:
-  ```bash
-  git config --global credential.helper store
-  ```
-
-  **Advertencia:** `credential.helper store` guarda tu token en un archivo de texto sin encriptar en tu computador (`~/.git-credentials`). Es cómodo para practicar, pero en un entorno profesional o compartido es mejor usar `gh auth login` o un gestor de credenciales seguro.
-</Callout>
-
-<Callout type="info" title="SSH es más avanzado">
-  Existe otra forma de autenticación llamada SSH que es más segura y no requiere poner contraseña cada vez. No la cubrimos aquí, pero funciona igual de bien. Si te interesa, puedes buscarlo en la documentación oficial de GitHub más adelante.
+<Callout type="info" title="¿Existe otra forma de autenticarse?">
+  Sí: SSH y tokens personales. Pero `gh auth login` es la forma más simple y segura para empezar. Configura todo automáticamente y no necesitas manejar tokens ni llaves. Si más adelante necesitas alternativas, puedes buscarlas en la documentación oficial de GitHub.
 </Callout>
 
 ---
@@ -209,17 +192,15 @@ git init
 Siempre crea el `.gitignore` antes de empezar a trabajar (como aprendiste en el Módulo 3):
 
 ```bash
-cat > .gitignore << 'EOF'
-.DS_Store
-Thumbs.db
-.env
-node_modules/
-*.tmp
-*.log
-EOF
+echo ".DS_Store" > .gitignore
+echo "Thumbs.db" >> .gitignore
+echo ".env" >> .gitignore
+echo "node_modules/" >> .gitignore
+echo "*.tmp" >> .gitignore
+echo "*.log" >> .gitignore
 
 git add .gitignore
-git commit -m "Agrega .gitignore"
+git commit -m "chore: agrega .gitignore"
 ```
 
 **Paso 3: Crear los archivos del proyecto y hacer el segundo commit**
@@ -229,7 +210,7 @@ echo "<!DOCTYPE html><html><body><h1>Hola Mundo</h1></body></html>" > index.html
 echo "body { font-family: sans-serif; }" > estilos.css
 
 git add index.html estilos.css
-git commit -m "Crea estructura básica del sitio web"
+git commit -m "feat: crea estructura básica del sitio web"
 ```
 
 **Paso 4: Crear un repositorio vacío en GitHub**
@@ -294,7 +275,7 @@ echo "<p>Bienvenido a mi sitio</p>" >> index.html
 
 # El flujo de siempre: status → add → commit
 git add index.html
-git commit -m "Agrega mensaje de bienvenida"
+git commit -m "feat: agrega mensaje de bienvenida"
 
 # Subir a GitHub (ya no necesitas -u ni origin ni main)
 git push

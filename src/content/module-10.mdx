@@ -51,48 +51,23 @@ git switch -c arreglo-cosa
 
 ---
 
-### Convenciones de commits
+### Convenciones de commits en equipo
 
-Los mensajes de commit son la documentación de tu proyecto. Cuando alguien (incluido tu yo del futuro) mira el historial, necesita entender qué pasó y por qué.
+En el Módulo 3 aprendiste **Conventional Commits** (`feat:`, `fix:`, `docs:`, etc.). En equipo, esto deja de ser una recomendación y se vuelve una **regla**: todos usan el mismo formato para que el historial sea legible y consistente.
 
-**Conventional Commits** es el estándar más usado. La idea es simple: agregar un prefijo al mensaje que indica el tipo de cambio:
-
-```
-tipo: descripción breve del cambio
-```
-
-Los tipos más comunes:
-
-| Tipo | Significado | Ejemplo |
-|------|-------------|---------|
-| `feat:` | Nueva funcionalidad | `feat: agrega filtro por categoría` |
-| `fix:` | Corrección de bug | `fix: corrige validación de email vacío` |
-| `docs:` | Documentación | `docs: actualiza guía de instalación` |
-| `style:` | Formato, espacios, punto y coma (no cambia lógica) | `style: formatea archivo con prettier` |
-| `refactor:` | Reestructurar sin cambiar funcionalidad | `refactor: extrae función de validación` |
-| `chore:` | Mantenimiento (dependencias, config) | `chore: actualiza dependencias` |
+**Recordatorio rápido del formato:**
 
 ```bash
-# Bien
 git commit -m "feat: agrega botón de exportar a PDF"
 git commit -m "fix: corrige cálculo de impuestos en factura"
 git commit -m "docs: agrega sección de FAQ al README"
-
-# Mal
-git commit -m "cambios"
-git commit -m "fix bug"
-git commit -m "asdfg"
-git commit -m "WIP"
 ```
 
 <Callout type="info" title="¿Y los commits WIP?">
-  Los commits "WIP" (Work In Progress) están bien mientras trabajas en tu rama. Son tu borrador. Lo importante es que **antes de crear el PR**, limpies tus commits con un squash merge o un rebase interactivo (ver [Módulo 8](#modulo-8)). Así el historial de `main` queda limpio.
+  Los commits "WIP" (Work In Progress) están bien mientras trabajas en tu rama. Son tu borrador. Lo importante es que al mergear el PR con **squash merge** (como viste en el Módulo 7), todos esos commits intermedios se combinan en uno limpio. Así el historial de `main` queda impecable.
 </Callout>
 
-**Reglas prácticas para buenos mensajes:**
-- Usa el imperativo: "agrega", "corrige", "elimina" (no "agregué" ni "agregando")
-- Primera línea: máximo 72 caracteres
-- Si necesitas más detalle, deja una línea en blanco y escribe un cuerpo descriptivo
+**Regla adicional para equipos:** si necesitas más detalle, deja una línea en blanco y escribe un cuerpo descriptivo:
 
 ```bash
 git commit -m "feat: agrega autenticación con Google
@@ -199,88 +174,27 @@ Ahora, cada vez que alguien crea un PR en este repositorio, verá este template 
 
 ---
 
-### Squash merge
+### Squash merge como convención de equipo
 
-Cuando trabajas en una rama, es normal hacer muchos commits pequeños: "WIP", "arregla typo", "ahora sí funciona", "ok ahora de verdad". Eso está bien para tu proceso, pero no quieres esos mensajes en el historial de `main`.
+En el Módulo 7 viste las tres estrategias de merge y recomendamos **squash merge** como default. En equipo, esto se convierte en una configuración del repositorio:
 
-**Squash merge** combina todos los commits de tu rama en un solo commit limpio al mergear:
-
-```
-main:  A --- B --- C --- D (un solo commit con todo el trabajo de la rama)
-
-En vez de:
-main:  A --- B --- WIP --- fix typo --- ahora sí --- de verdad --- merge commit
-```
-
-**Cómo hacer squash merge:**
-
-```bash
-# Desde la terminal con gh
-gh pr merge --squash
-
-# El commit resultante tendrá el título del PR como mensaje
-```
-
-**En GitHub (navegador):**
-1. En el PR, haz clic en la flecha junto al botón "Merge pull request"
-2. Selecciona "Squash and merge"
-3. Edita el mensaje del commit si quieres
-4. Confirma
-
-**Configurar squash como default en tu repositorio:**
+**Configurar squash como único método permitido:**
 1. Settings → General → Pull Requests
 2. Desmarca "Allow merge commits" y "Allow rebase merge"
 3. Deja solo "Allow squash merging" marcado
 
-<Callout type="info" title="¿Squash, merge commit o rebase merge?">
-  Las tres opciones al mergear un PR hacen cosas diferentes:
-
-  | Estrategia | Qué hace | Cuándo usarla |
-  |-----------|----------|---------------|
-  | **Merge commit** | Mantiene todos los commits + agrega commit de merge | Cuando quieres preservar el historial completo |
-  | **Squash merge** | Combina todo en un solo commit | Para features con muchos commits "WIP" |
-  | **Rebase merge** | Re-aplica cada commit sobre main (sin commit de merge) | Cuando cada commit de la rama es limpio y significativo |
-
-  La mayoría de equipos usan **squash merge** como default. Mantiene `main` limpio y fácil de leer. Si quieres profundizar en rebase, revisa el [Módulo 8](#modulo-8).
-</Callout>
+Así ningún miembro del equipo puede mergear accidentalmente con otra estrategia. Todos los PRs producen un solo commit limpio en `main`.
 
 ---
 
-### Resolución de conflictos en equipo
+### Prevenir conflictos en equipo
 
-En el [Módulo 6](#modulo-6) aprendiste a resolver conflictos técnicamente. En equipo, los conflictos son también un **problema de comunicación**.
+En el Módulo 6 aprendiste a resolver conflictos técnicamente (los marcadores `<<<<<<<`, `=======`, `>>>>>>>`). En equipo, la clave no es solo resolverlos sino **minimizarlos**:
 
-**Estrategias para minimizar conflictos:**
-
-1. **Divide el trabajo por archivos/componentes.** Si Ana trabaja en el header y Bob en el footer, no habrá conflictos. Antes de empezar una tarea, revisen quién está tocando qué.
-
-2. **Haz pull frecuentemente.** No trabajes 3 días sin sincronizar. Actualiza tu rama diariamente:
-
-```bash
-# Actualizar tu rama con los últimos cambios de main
-git switch main
-git pull
-git switch mi-rama
-git merge main
-# Resuelve conflictos AHORA que son pequeños, no en 3 días cuando son enormes
-```
-
-3. **Ramas pequeñas, PRs frecuentes.** Una rama que dura 2 días tiene menos conflictos que una que dura 2 semanas.
-
-4. **Comunica antes de refactorizar.** Si vas a mover archivos, renombrar funciones o cambiar la estructura, avisa al equipo. Esos cambios generan conflictos en todas las ramas activas.
-
-**Cuando el conflicto llega (y va a llegar):**
-
-```bash
-# Paso 1: No entres en pánico
-# Paso 2: Habla con la otra persona
-# "Oye, tengo un conflicto con tu cambio en auth.js, ¿puedes explicarme qué hiciste?"
-
-# Paso 3: Resuelve juntos si es complejo
-# Paso 4: Haz commit del merge
-git add .
-git commit -m "fix: resuelve conflicto en auth.js con cambios de Ana"
-```
+1. **Divide el trabajo por archivos/componentes.** Si Ana trabaja en el header y Bob en el footer, no habrá conflictos.
+2. **Haz pull frecuentemente.** Actualiza tu rama diariamente, no cada 3 días.
+3. **Ramas pequeñas, PRs frecuentes.** Una rama de 2 días tiene menos conflictos que una de 2 semanas.
+4. **Comunica antes de refactorizar.** Mover archivos o renombrar funciones genera conflictos en todas las ramas activas. Avisa al equipo.
 
 <Callout type="warning" title="Nunca resuelvas conflictos adivinando">
   Si no entiendes qué hace el código de la otra persona, **pregunta**. Resolver un conflicto adivinando puede introducir bugs que nadie detecta hasta producción.
@@ -368,59 +282,17 @@ git push --force origin feature/mi-rama
 
 ---
 
-### Fork vs Clone / Merge vs Rebase vs Squash
+<Callout type="tip" title="Guía rápida de decisión para equipos">
+  **¿Cómo colaborar?** Si es un proyecto de tu equipo, usa clone + ramas + PR (Módulo 7). Si es un proyecto ajeno, usa fork (Módulo 8).
 
-Dos preguntas frecuentes cuando empiezas a trabajar en equipo: ¿cuándo hago fork y cuándo clone? ¿Cuándo hago merge, rebase o squash?
-
-**Fork vs Clone:**
-
-| | Fork | Clone |
-|---|------|-------|
-| **Qué hace** | Crea una copia del repo en **tu** cuenta de GitHub | Descarga el repo a tu computador |
-| **Cuándo usarlo** | Contribuir a un proyecto **ajeno** (open source) | Trabajar en un proyecto **de tu equipo** |
-| **Permisos** | No necesitas permisos del repo original | Necesitas acceso al repo |
-| **Flujo** | Fork → Clone → Branch → Push → PR al repo original | Clone → Branch → Push → PR en el mismo repo |
-
-```bash
-# FORK: para contribuir a un proyecto que no es tuyo
-# 1. Haz fork en GitHub (botón "Fork")
-# 2. Clona TU fork
-git clone https://github.com/TU-USUARIO/proyecto-ajeno.git
-# 3. Trabaja, push a tu fork, crea PR al repo original
-
-# CLONE: para trabajar en tu equipo
-git clone https://github.com/MI-EQUIPO/nuestro-proyecto.git
-# Trabajas directamente, push al mismo repo
-```
-
-**Merge vs Rebase vs Squash:**
-
-| | Merge commit | Rebase | Squash merge |
-|---|-------------|--------|-------------|
-| **Historial** | Conserva todo + commit de merge | Lineal, re-aplica commits | Un solo commit limpio |
-| **Commits originales** | Se mantienen todos | Se re-escriben | Se combinan en uno |
-| **Cuándo usarlo** | Cuando el historial detallado importa | Cuando quieres historial lineal limpio | Cuando la rama tiene commits "WIP" |
-| **Riesgo** | Historial puede ser difícil de leer | Puede causar conflictos si se usa mal | Se pierde el detalle de commits individuales |
-
-<Callout type="tip" title="Guía rápida de decisión">
-  **¿En qué tipo de proyecto estás?**
-
-  - **Proyecto open source ajeno** → Fork + PR
-  - **Proyecto de tu equipo** → Clone + ramas + PR
-  - **Proyecto personal** → Clone + push directo a main (está bien para proyectos pequeños)
-
-  **¿Cómo mergear tu PR?**
-
-  - **Tu rama tiene commits limpios y bien escritos** → Merge commit o rebase
-  - **Tu rama tiene commits WIP, typos, "ahora sí"** → Squash merge
-  - **No sabes cuál elegir** → Squash merge (es la opción más segura)
+  **¿Cómo mergear PRs?** Configura squash merge como default (como viste arriba). Es la opción más segura y mantiene `main` limpio.
 </Callout>
 
 ---
 
 ### Extra: AGENTS.md — tus convenciones para agentes de IA
 
-En el [Módulo 9](#modulo-9) aprendiste a usar agentes de IA como Claude Code o Gemini CLI en la terminal. Cuando trabajas con estos agentes en un proyecto de equipo, surge un problema: **el agente no conoce las convenciones de tu equipo**. Puede hacer commits con mensajes en inglés cuando tu equipo los escribe en español, o hacer push directo a `main` cuando tu equipo usa PRs.
+Si usas agentes de IA como Claude Code o Gemini CLI (Módulo 9), cuando trabajas con ellos en un proyecto de equipo surge un problema: **el agente no conoce las convenciones de tu equipo**. Puede hacer commits con mensajes en inglés cuando tu equipo los escribe en español, o hacer push directo a `main` cuando tu equipo usa PRs.
 
 La solución es un archivo `AGENTS.md` (o `CLAUDE.md`, dependiendo del agente) en la raíz de tu repositorio. Este archivo le dice al agente de IA las reglas del proyecto, exactamente igual que el PR template le dice a un humano cómo crear un PR.
 
@@ -539,17 +411,14 @@ git add . && git commit -m "chore: inicializa proyecto"
 
 # Crea un PR template
 mkdir -p .github
-cat > .github/pull_request_template.md << 'EOF'
-## ¿Qué hace este PR?
-
-## Tipo de cambio
-- [ ] Feature
-- [ ] Fix
-- [ ] Docs
-
-## ¿Cómo se probó?
-
-EOF
+echo "## ¿Qué hace este PR?" > .github/pull_request_template.md
+echo "" >> .github/pull_request_template.md
+echo "## Tipo de cambio" >> .github/pull_request_template.md
+echo "- [ ] Feature" >> .github/pull_request_template.md
+echo "- [ ] Fix" >> .github/pull_request_template.md
+echo "- [ ] Docs" >> .github/pull_request_template.md
+echo "" >> .github/pull_request_template.md
+echo "## ¿Cómo se probó?" >> .github/pull_request_template.md
 
 git add . && git commit -m "chore: agrega template de Pull Request"
 ```

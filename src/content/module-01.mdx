@@ -1,20 +1,16 @@
 import Callout from '../components/Callout.astro';
 import CommandTable from '../components/CommandTable.astro';
 
-## Antes de aprender a conducir, necesitas saber dónde está el volante
+## Antes de empezar: lo que necesitas saber de la terminal
 
-Git es una herramienta que se usa desde la **terminal** (esa pantalla negra con texto). Antes de meternos de lleno en Git, necesitamos asegurarnos de que te sientes cómodo con los comandos básicos de navegación.
+Git es una herramienta que se usa desde la **terminal**. Para seguir este curso, necesitas poder navegar entre carpetas, crear archivos y ver su contenido. No necesitas ser experto — solo manejar estos comandos básicos.
 
-Piensa en la terminal como el explorador de archivos de tu computador, pero en vez de hacer clic con el ratón, le escribes instrucciones. Es más rápido de lo que crees, y una vez que le agarras el ritmo, no vas a querer volver.
-
-<Callout type="info" title="¿Ya hiciste el curso de Terminal y Bash?">
-  Si ya completaste el <a href="https://paulovillarroel.github.io/curso-terminal-bash/" target="_blank" rel="noopener noreferrer">curso de Terminal y Bash</a>, este módulo es un repaso rápido. Puedes hojearlo y pasar directo al Módulo 2.
-
-  Si es tu primera vez con la terminal, no te preocupes: aquí aprenderás lo justo y necesario para empezar con Git.
+<Callout type="info" title="¿Nunca has usado la terminal?">
+  Si es tu primera vez, completa primero el <a href="https://paulovillarroel.github.io/curso-terminal-bash/" target="_blank" rel="noopener noreferrer">curso de Terminal y Bash</a>. Te tomará poco tiempo y te dará la base que necesitas. Si ya lo hiciste o ya te manejas con la terminal, sigue directo al Módulo 2.
 </Callout>
 
 <Callout type="tip" title="¿Cómo abro la terminal?">
-  **En WSL (Windows):** Busca "Ubuntu 24.04" o "Terminal" en el menú de inicio. Si instalaste WSL, debería aparecer.
+  **En WSL (Windows):** Busca "Ubuntu 24.04" o "Terminal" en el menú de inicio.
 
   **En macOS:** Abre Spotlight con `Cmd + Espacio`, escribe "Terminal" y presiona Enter.
 
@@ -23,213 +19,36 @@ Piensa en la terminal como el explorador de archivos de tu computador, pero en v
 
 ---
 
-### `pwd` — Tu brújula
+### Checklist de comandos esenciales
 
-`pwd` significa **Print Working Directory** (imprimir directorio de trabajo). En español: "¿dónde estoy parado ahora mismo?"
-
-Cada vez que abres la terminal, estás "parado" en alguna carpeta de tu computador. `pwd` te dice exactamente cuál.
-
-```bash
-pwd
-# /home/tu-usuario
-```
-
-Ese resultado te dice que estás en la carpeta personal de tu usuario. Es tu "casa" dentro del computador.
-
----
-
-### `ls` y `ls -la` — Mirar alrededor
-
-`ls` es como abrir los ojos y ver qué hay en la carpeta donde estás. Viene de **list** (listar).
-
-```bash
-ls
-# Documentos  Descargas  Escritorio  Imágenes
-```
-
-Pero `ls` solo te muestra lo básico. Si quieres ver **todo**, incluyendo archivos ocultos (los que empiezan con un punto `.`), usa:
-
-```bash
-ls -la
-# total 32
-# drwxr-xr-x  5 tu-usuario tu-usuario 4096 ene 15 10:30 .
-# drwxr-xr-x  3 root       root       4096 ene 10 08:00 ..
-# -rw-r--r--  1 tu-usuario tu-usuario  220 ene 10 08:00 .bashrc
-# drwxr-xr-x  2 tu-usuario tu-usuario 4096 ene 15 10:30 Documentos
-```
-
-¿Ves esos archivos que empiezan con punto (`.bashrc`)? Son archivos ocultos. Más adelante, cuando uses Git, verás una carpeta `.git` que es donde Git guarda toda su magia. Sin `ls -la` no la verías.
-
-Las flags (banderas) que usamos:
-- `-l` muestra detalles (permisos, tamaño, fecha)
-- `-a` muestra **todos** los archivos, incluyendo los ocultos
-
----
-
-### `cd` y `cd ..` — Caminar entre carpetas
-
-`cd` significa **Change Directory** (cambiar de directorio). Es como caminar de una carpeta a otra.
-
-```bash
-# Entrar a la carpeta Documentos
-cd Documentos
-pwd
-# /home/tu-usuario/Documentos
-
-# Volver una carpeta atrás (al "padre")
-cd ..
-pwd
-# /home/tu-usuario
-
-# Volver a tu carpeta home desde cualquier lugar
-cd ~
-pwd
-# /home/tu-usuario
-```
-
-El `..` significa "la carpeta de arriba" (la carpeta padre). Y `~` es un atajo para tu carpeta home.
-
----
-
-### `mkdir` — Construir carpetas
-
-`mkdir` significa **Make Directory** (crear directorio). Así es como creas carpetas nuevas.
-
-```bash
-# Crear una carpeta para nuestro proyecto
-mkdir mi-primer-proyecto
-
-# Verificar que se creó
-ls
-# Documentos  Descargas  mi-primer-proyecto
-```
-
----
-
-### `touch` — Crear archivos vacíos
-
-`touch` crea un archivo nuevo y vacío. Es perfecto para cuando necesitas crear archivos rápidamente.
-
-```bash
-# Primero entramos a nuestra carpeta
-cd mi-primer-proyecto
-
-# Creamos algunos archivos
-touch index.html
-touch estilos.css
-touch app.js
-
-# Verificamos
-ls
-# app.js  estilos.css  index.html
-```
-
----
-
-### `echo` y `cat` — Escribir y leer archivos desde la terminal
-
-En los siguientes módulos vamos a usar mucho estos dos comandos para crear y ver contenido de archivos rápidamente:
-
-**`echo`** escribe texto. Puedes usarlo para crear archivos con contenido:
-
-```bash
-# Crear un archivo con texto (> crea o sobreescribe el archivo)
-echo "Hola Mundo" > saludo.txt
-
-# Agregar texto al final de un archivo (>> agrega sin borrar)
-echo "Segunda línea" >> saludo.txt
-```
-
-- `>` significa "escribe esto en el archivo" (si el archivo existe, lo sobreescribe)
-- `>>` significa "agrega esto al final del archivo" (sin borrar lo que ya tiene)
-
-**`cat`** muestra el contenido de un archivo en la terminal:
-
-```bash
-cat saludo.txt
-# Hola Mundo
-# Segunda línea
-```
-
-<Callout type="tip" title="echo y cat serán tus aliados">
-  Los usaremos constantemente para crear archivos de ejemplo rápido y verificar su contenido. No necesitas memorizarlos ahora, los irás aprendiendo con la práctica.
-</Callout>
-
----
-
-### Tab: Tu mejor amigo
-
-Esto es **oro puro**: cuando estés escribiendo un nombre de archivo o carpeta, presiona la tecla `Tab` y la terminal lo completa automáticamente.
-
-```bash
-# En vez de escribir "mi-primer-proyecto" completo:
-cd mi-p    # presiona Tab aquí
-# Se completa a: cd mi-primer-proyecto/
-```
-
-Si hay varias opciones que empiezan igual, presiona `Tab` dos veces y te mostrará las opciones disponibles. Esto te ahorra muchísimo tiempo y evita errores de escritura.
-
-<Callout type="tip" title="Consejo de oro">
-  Usa Tab **todo el tiempo**. Los programadores profesionales lo hacen constantemente. Es más rápido y evita errores de tipeo en nombres largos.
-</Callout>
-
----
-
-### Tabla resumen
+Antes de continuar, asegúrate de que puedes hacer cada una de estas cosas en tu terminal. Si alguna te suena desconocida, revisa el <a href="https://paulovillarroel.github.io/curso-terminal-bash/" target="_blank" rel="noopener noreferrer">curso de Terminal y Bash</a>.
 
 <CommandTable commands={[
-  { command: "pwd", description: "Muestra en qué carpeta estás" },
-  { command: "ls", description: "Lista archivos y carpetas" },
-  { command: "ls -la", description: "Lista todo, incluyendo ocultos y detalles" },
-  { command: "cd carpeta", description: "Entra a una carpeta" },
-  { command: "cd ..", description: "Sube un nivel (carpeta padre)" },
-  { command: "cd ~", description: "Vuelve a tu carpeta home" },
-  { command: "mkdir nombre", description: "Crea una carpeta nueva" },
-  { command: "touch archivo", description: "Crea un archivo vacío" },
-  { command: "echo \"texto\" > archivo", description: "Crea un archivo con texto (o sobreescribe)" },
-  { command: "echo \"texto\" >> archivo", description: "Agrega texto al final de un archivo" },
-  { command: "cat archivo", description: "Muestra el contenido de un archivo" },
+  { command: "pwd", description: "Saber en qué carpeta estás" },
+  { command: "ls -la", description: "Ver archivos, incluyendo ocultos (necesario para ver .git)" },
+  { command: "cd carpeta / cd .. / cd ~", description: "Moverte entre carpetas" },
+  { command: "mkdir nombre", description: "Crear carpetas" },
+  { command: "touch archivo", description: "Crear archivos vacíos" },
+  { command: "echo \"texto\" > archivo", description: "Crear un archivo con contenido (> sobreescribe, >> agrega)" },
+  { command: "cat archivo", description: "Ver el contenido de un archivo" },
 ]} />
 
 ---
 
-### Ejercicios del módulo
+### Verificación rápida
 
-Estos ejercicios son para practicar. Escribe cada comando en tu terminal y observa qué pasa.
-
-**Ejercicio 1:** Abre tu terminal y usa `pwd`. ¿En qué carpeta estás? Esa es tu "casa".
-
-**Ejercicio 2:** Usa `ls -la` en tu carpeta home. ¿Ves archivos que empiezan con punto? Esos son archivos ocultos de configuración.
-
-**Ejercicio 3:** Crea una carpeta llamada `mi-primer-proyecto` con `mkdir` y entra en ella con `cd`.
+Si puedes ejecutar estos comandos sin problema, estás listo:
 
 ```bash
-mkdir mi-primer-proyecto
-cd mi-primer-proyecto
-pwd
-# Deberías ver algo como: /home/tu-usuario/mi-primer-proyecto
+mkdir test-terminal && cd test-terminal
+echo "Hola Git" > prueba.txt
+cat prueba.txt
+ls -la
+cd ..
 ```
 
-**Ejercicio 4:** Dentro de esa carpeta, crea 3 archivos con `touch`:
-
-```bash
-touch index.html
-touch estilos.css
-touch app.js
-```
-
-**Ejercicio 5:** Usa `ls` para verificar que se crearon los 3 archivos. Luego vuelve a tu home con `cd ~`.
-
-```bash
-ls
-# app.js  estilos.css  index.html
-cd ~
-pwd
-# /home/tu-usuario
-```
-
-**Ejercicio 6:** Practica el autocompletado: escribe `cd mi-` y presiona `Tab`. ¿Se completó automáticamente a `mi-primer-proyecto`?
-
-<Callout type="tip" title="¡Bien hecho!">
-  Si completaste estos ejercicios, ya tienes las herramientas básicas para moverte por la terminal. Eso es todo lo que necesitas para empezar con Git. ¡Vamos al siguiente módulo!
+<Callout type="tip" title="Tab: tu mejor amigo">
+  Cuando escribas nombres de carpetas o archivos, presiona `Tab` para autocompletar. Los programadores profesionales lo usan todo el tiempo — es más rápido y evita errores de tipeo.
 </Callout>
+
+Si todo funciona, ya tienes lo que necesitas. ¡Vamos al Módulo 2!

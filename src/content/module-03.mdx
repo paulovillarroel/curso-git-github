@@ -155,8 +155,8 @@ Antes de hacer el commit, agreguemos la línea nueva al staging:
 
 ```bash
 git add receta.txt
-git commit -m "Agrega receta inicial de pasta"
-# [main (root-commit) a1b2c3d] Agrega receta inicial de pasta
+git commit -m "feat: agrega receta inicial de pasta"
+# [main (root-commit) a1b2c3d] feat: agrega receta inicial de pasta
 #  1 file changed, 2 insertions(+)
 #  create mode 100644 receta.txt
 ```
@@ -173,6 +173,41 @@ git commit -m "Agrega receta inicial de pasta"
   **Malos mensajes:** "cambios", "fix", "asdfg", "wip", "cosas"
 
   Un buen mensaje responde a: "¿Qué hice y por qué?" Tu yo del futuro te lo agradecerá.
+</Callout>
+
+---
+
+### Conventional Commits — El formato profesional (recomendado)
+
+Existe un estándar muy usado en equipos profesionales llamado **Conventional Commits**. La idea es agregar un prefijo al mensaje que indica el tipo de cambio:
+
+```
+tipo: descripción breve del cambio
+```
+
+Los tipos más comunes:
+
+| Tipo | Significado | Ejemplo |
+|------|-------------|---------|
+| `feat:` | Nueva funcionalidad | `feat: agrega filtro por categoría` |
+| `fix:` | Corrección de error | `fix: corrige validación de email vacío` |
+| `docs:` | Documentación | `docs: actualiza guía de instalación` |
+| `refactor:` | Reestructurar sin cambiar funcionalidad | `refactor: extrae función de validación` |
+| `chore:` | Mantenimiento (dependencias, config) | `chore: actualiza dependencias` |
+
+```bash
+# Con Conventional Commits
+git commit -m "feat: agrega botón de exportar a PDF"
+git commit -m "fix: corrige cálculo de impuestos en factura"
+git commit -m "docs: agrega sección de FAQ al README"
+```
+
+No es obligatorio usarlo al inicio, pero **te recomendamos adoptarlo desde ahora**. Cuando trabajes en equipo (Módulo 10), será la convención estándar. Y si lo practicas desde aquí, ya te saldrá natural.
+
+<Callout type="info" title="Reglas prácticas para mensajes">
+  - Usa el imperativo: "agrega", "corrige", "elimina" (no "agregué" ni "agregando")
+  - Primera línea: máximo 72 caracteres
+  - Que responda a "¿Qué hice y por qué?"
 </Callout>
 
 ---
@@ -208,27 +243,27 @@ No todos los archivos deben ser rastreados por Git. Archivos temporales, contras
 Crea un archivo llamado `.gitignore` (con el punto al inicio) en la raíz de tu proyecto:
 
 ```bash
-# Crear .gitignore
-cat > .gitignore << 'EOF'
-# Archivos del sistema operativo
-.DS_Store
-Thumbs.db
-
-# Archivos con contraseñas o datos sensibles
-.env
-*.secret
-
-# Carpetas de dependencias (se regeneran)
-node_modules/
-
-# Archivos temporales
-*.tmp
-*.log
-EOF
+# Crear .gitignore línea por línea
+echo "# Archivos del sistema operativo" > .gitignore
+echo ".DS_Store" >> .gitignore
+echo "Thumbs.db" >> .gitignore
+echo "" >> .gitignore
+echo "# Archivos con contraseñas o datos sensibles" >> .gitignore
+echo ".env" >> .gitignore
+echo "*.secret" >> .gitignore
+echo "" >> .gitignore
+echo "# Carpetas de dependencias (se regeneran)" >> .gitignore
+echo "node_modules/" >> .gitignore
+echo "" >> .gitignore
+echo "# Archivos temporales" >> .gitignore
+echo "*.tmp" >> .gitignore
+echo "*.log" >> .gitignore
 
 git add .gitignore
-git commit -m "Agrega .gitignore"
+git commit -m "chore: agrega .gitignore"
 ```
+
+Recuerda: `>` crea el archivo (o lo sobreescribe), `>>` agrega al final sin borrar lo anterior.
 
 Cada línea es un patrón. Los archivos que coincidan serán **invisibles** para Git: no aparecerán en `git status` ni se subirán a GitHub.
 
@@ -250,21 +285,19 @@ mkdir mi-receta && cd mi-receta
 git init
 
 # 3. Crear .gitignore (siempre hazlo antes de tu primer commit)
-cat > .gitignore << 'EOF'
-# Archivos del sistema operativo
-.DS_Store
-Thumbs.db
-
-# Archivos con datos sensibles
-.env
-
-# Carpetas de dependencias
-node_modules/
-
-# Archivos temporales
-*.tmp
-*.log
-EOF
+echo "# Archivos del sistema operativo" > .gitignore
+echo ".DS_Store" >> .gitignore
+echo "Thumbs.db" >> .gitignore
+echo "" >> .gitignore
+echo "# Archivos con datos sensibles" >> .gitignore
+echo ".env" >> .gitignore
+echo "" >> .gitignore
+echo "# Carpetas de dependencias" >> .gitignore
+echo "node_modules/" >> .gitignore
+echo "" >> .gitignore
+echo "# Archivos temporales" >> .gitignore
+echo "*.tmp" >> .gitignore
+echo "*.log" >> .gitignore
 
 # 4. Crear el primer archivo
 echo "# Receta de Pasta" > receta.txt
@@ -279,7 +312,7 @@ git add .gitignore receta.txt
 git status
 
 # 8. Tomar la foto (hacer commit)
-git commit -m "Agrega receta inicial y .gitignore"
+git commit -m "feat: agrega receta inicial y .gitignore"
 
 # 9. Agregar más contenido
 echo "" >> receta.txt
@@ -293,12 +326,12 @@ git diff
 
 # 11. Preparar y tomar otra foto
 git add receta.txt
-git commit -m "Agrega lista de ingredientes"
+git commit -m "feat: agrega lista de ingredientes"
 
 # 12. Ver el álbum de fotos
 git log --oneline
-# b2c3d4e Agrega lista de ingredientes
-# a1b2c3d Agrega receta inicial y .gitignore
+# b2c3d4e feat: agrega lista de ingredientes
+# a1b2c3d feat: agrega receta inicial y .gitignore
 ```
 
 ¿Ves que el `.gitignore` fue parte del primer commit? Así cualquier archivo temporal o sensible queda excluido desde el inicio (revisa la sección de `.gitignore` más arriba para entender cada línea).
@@ -352,7 +385,7 @@ echo "Hola Git, este es mi primer archivo" > notas.txt
 **Ejercicio 5:** Haz tu primer commit con un mensaje descriptivo:
 
 ```bash
-git commit -m "Agrega archivo de notas inicial"
+git commit -m "feat: agrega archivo de notas inicial"
 ```
 
 **Ejercicio 6:** Modifica el archivo, usa `git diff` para ver los cambios, luego haz add y commit:
@@ -362,7 +395,7 @@ echo "Hoy aprendí git add y git commit" >> notas.txt
 git diff
 # Deberías ver la línea nueva con un + en verde
 git add notas.txt
-git commit -m "Agrega nota sobre lo aprendido hoy"
+git commit -m "docs: agrega nota sobre lo aprendido hoy"
 git log --oneline
 # Deberías ver 2 commits
 ```
