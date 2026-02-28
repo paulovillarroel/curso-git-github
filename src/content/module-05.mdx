@@ -169,17 +169,92 @@ git commit -m "Resuelve conflicto: elige salsa boloñesa"
 
 ---
 
-### `git branch -d` — Limpieza
+### `git rebase` — Otra forma de integrar cambios
 
-Después de hacer merge, la rama ya cumplió su propósito. Puedes borrarla para mantener las cosas ordenadas.
+Merge no es la única forma de integrar cambios entre ramas. Existe otra herramienta llamada **rebase** que logra lo mismo, pero de una forma diferente.
+
+La diferencia clave es **cómo queda la historia**:
+
+- **Merge** crea un "nudo" en la historia: un commit especial de merge que une las dos ramas
+- **Rebase** "reescribe" la historia para que sea **lineal**, como si hubieras hecho tus cambios después de todo lo que pasó en main
+
+```
+Merge: crea un commit de merge (M) que une las ramas
+        main:    A --- B --- C --------- M
+                              \         /
+        feature:               D --- E
+
+Rebase: mueve tus commits para que empiecen desde la punta de main
+        main:    A --- B --- C
+                              \
+        feature:               D' --- E'
+```
+
+Con merge, la historia muestra "aquí se juntaron dos ramas". Con rebase, la historia queda limpia y lineal, como si la rama feature nunca hubiera existido por separado.
+
+**El comando básico:**
 
 ```bash
-# Borrar la rama (solo funciona si ya fue mergeada)
+# Estando en tu rama feature
+git rebase main
+```
+
+Esto "mueve" los commits de tu rama para que empiecen desde la punta de `main`. Tus commits D y E se convierten en D' y E' (copias con el mismo contenido pero en una nueva posición de la historia).
+
+<Callout type="warning" title="Regla de oro del rebase">
+  **Nunca hagas rebase de commits que ya compartiste** (que ya subiste con `git push`). Rebase reescribe la historia, y si alguien más ya tiene esos commits, van a tener problemas para sincronizar su trabajo. Si ya hiciste push, usa merge.
+</Callout>
+
+<Callout type="tip" title="¿Merge o rebase?">
+  Ambos logran lo mismo: integrar cambios de una rama a otra. **Merge** preserva la historia tal cual fue (con sus bifurcaciones y uniones). **Rebase** la simplifica (todo queda lineal). Para principiantes, merge es más seguro porque no reescribe la historia. Cuando te sientas cómodo con Git, prueba rebase — muchos equipos lo prefieren por mantener un historial más limpio.
+</Callout>
+
+---
+
+### `git branch -d` — Limpieza de ramas
+
+Cuando una rama ya fue mergeada, **debes borrarla**. Una rama que ya cumplió su propósito no tiene razón de seguir existiendo. Dejarla ahí solo genera confusión: con el tiempo, el repositorio se llena de ramas viejas y nadie sabe cuáles están activas y cuáles son basura.
+
+La regla es simple: **rama mergeada = rama borrada**.
+
+```bash
+# Borrar la rama local (solo funciona si ya fue mergeada)
 git branch -d feature/saludo
 # Deleted branch feature/saludo (was e5f6a7b).
 ```
 
-La `-d` es de "delete" (borrar). Si la rama no ha sido mergeada, Git te avisará para que no pierdas trabajo accidentalmente.
+La `-d` (de "delete") es la forma **segura** de borrar: Git verifica que la rama ya fue mergeada antes de borrarla. Si no fue mergeada, te avisa para que no pierdas trabajo accidentalmente.
+
+Si la rama también fue subida a GitHub, necesitas borrarla en el remoto también:
+
+```bash
+# Borrar la rama en GitHub
+git push origin --delete feature/saludo
+```
+
+<Callout type="tip" title="Limpieza completa después de un merge">
+  Acostúmbrate a este flujo cada vez que termines con una rama:
+
+  ```bash
+  # 1. Borrar la rama local
+  git branch -d feature/saludo
+
+  # 2. Borrar la rama remota (si la subiste a GitHub)
+  git push origin --delete feature/saludo
+  ```
+
+  En GitHub, cuando mergeas un Pull Request, te ofrece un botón para borrar la rama remota automáticamente. Úsalo siempre.
+</Callout>
+
+<Callout type="warning" title="¿Y si no la mergeé pero quiero borrarla igual?">
+  Si decidiste descartar una rama experimental que no funcionó, Git no te dejará borrarla con `-d` porque detecta que perderías trabajo. Si estás seguro de que quieres borrarla, usa `-D` (mayúscula):
+
+  ```bash
+  git branch -D feature/experimento-fallido
+  ```
+
+  Esto fuerza el borrado. Úsalo solo cuando estés seguro de que no necesitas esos cambios.
+</Callout>
 
 ---
 
@@ -190,7 +265,10 @@ La `-d` es de "delete" (borrar). Si la rama no ha sido mergeada, Git te avisará
   { command: "git switch -c nombre-rama", description: "Crear una rama nueva y moverte a ella" },
   { command: "git switch nombre-rama", description: "Cambiar de rama" },
   { command: "git merge nombre-rama", description: "Traer los cambios de una rama a la actual" },
-  { command: "git branch -d nombre-rama", description: "Borrar una rama ya mergeada" },
+  { command: "git rebase main", description: "Reescribir tu rama para que empiece desde la punta de main" },
+  { command: "git branch -d nombre-rama", description: "Borrar una rama local ya mergeada" },
+  { command: "git push origin --delete nombre-rama", description: "Borrar una rama remota en GitHub" },
+  { command: "git branch -D nombre-rama", description: "Forzar borrado de rama no mergeada" },
 ]} />
 
 ---
