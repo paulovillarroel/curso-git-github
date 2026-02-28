@@ -1,18 +1,22 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
 
-const fundamentosModules = [
+const basicoModules = [
   { id: 'modulo-1', label: '1. Supervivencia en Terminal' },
   { id: 'modulo-2', label: '2. Configuración inicial' },
   { id: 'modulo-3', label: '3. Ciclo de vida local' },
-  { id: 'modulo-4', label: '4. Viajes en el tiempo' },
-  { id: 'modulo-5', label: '5. Ramas (universos paralelos)' },
-  { id: 'modulo-6', label: '6. GitHub (la nube)' },
+  { id: 'modulo-4', label: '4. GitHub (la nube)' },
 ];
 
-const advancedModules = [
-  { id: 'modulo-7', label: '7. Flujo profesional' },
-  { id: 'modulo-8', label: '8. GitHub CLI y agentes IA' },
+const intermedioModules = [
+  { id: 'modulo-5', label: '5. Viajes en el tiempo' },
+  { id: 'modulo-6', label: '6. Ramas (universos paralelos)' },
+  { id: 'modulo-7', label: '7. Flujo profesional (PRs)' },
+];
+
+const avanzadoModules = [
+  { id: 'modulo-8', label: '8. Técnicas avanzadas' },
+  { id: 'modulo-9', label: '9. GitHub CLI y agentes IA' },
 ];
 ---
 
@@ -40,12 +44,12 @@ const advancedModules = [
       Inicio
     </a>
 
-    <!-- Sección Fundamentos -->
+    <!-- Sección Básico -->
     <div class="mt-4 mb-2 px-3">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Fundamentos</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Básico</span>
     </div>
     <ul class="space-y-1">
-      {fundamentosModules.map(({ id, label }) => (
+      {basicoModules.map(({ id, label }) => (
         <li>
           <a
             href={`#${id}`}
@@ -58,12 +62,30 @@ const advancedModules = [
       ))}
     </ul>
 
-    <!-- Sección Avanzada -->
+    <!-- Sección Intermedio -->
+    <div class="mt-4 mb-2 px-3">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Intermedio</span>
+    </div>
+    <ul class="space-y-1">
+      {intermedioModules.map(({ id, label }) => (
+        <li>
+          <a
+            href={`#${id}`}
+            class="sidebar-link block px-3 py-2 text-sm text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+            data-section={id}
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Sección Avanzado -->
     <div class="mt-4 mb-2 px-3">
       <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Avanzado</span>
     </div>
     <ul class="space-y-1">
-      {advancedModules.map(({ id, label }) => (
+      {avanzadoModules.map(({ id, label }) => (
         <li>
           <a
             href={`#${id}`}
@@ -81,6 +103,15 @@ const advancedModules = [
       <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Práctica</span>
     </div>
     <ul class="space-y-1">
+      <li>
+        <a
+          href="#rutinas"
+          class="sidebar-link block px-3 py-2 text-sm text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+          data-section="rutinas"
+        >
+          Rutinas diarias
+        </a>
+      </li>
       <li>
         <a
           href="#errores-comunes"
@@ -114,7 +145,7 @@ const advancedModules = [
     <div class="mt-6 mx-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg space-y-2">
       <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <span>Progreso</span>
-        <span id="sidebar-progress-text">0 / 10</span>
+        <span id="sidebar-progress-text">0 / 11</span>
       </div>
       <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
         <div id="sidebar-progress-bar" class="h-full bg-green-500 rounded-full transition-all duration-500" style="width: 0%"></div>
@@ -123,7 +154,7 @@ const advancedModules = [
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span>~5 horas</span>
+        <span>~6 horas</span>
       </div>
     </div>
   </nav>
@@ -157,7 +188,7 @@ const advancedModules = [
     const TRACKABLE = [
       'modulo-1','modulo-2','modulo-3','modulo-4',
       'modulo-5','modulo-6','modulo-7','modulo-8',
-      'errores-comunes','ejercicios'
+      'modulo-9','errores-comunes','ejercicios'
     ];
 
     function getProgress() {

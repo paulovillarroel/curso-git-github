@@ -1,0 +1,120 @@
+import Callout from '../components/Callout.astro';
+
+## Tu código solo existe si está en la nube
+
+Para profesionales que no vienen del mundo del desarrollo, hay una regla de oro: **el código que solo vive en tu computador no existe para el resto del equipo**. Si mañana te enfermas, te mandan a terreno o tu computador falla, el equipo necesita poder retomar tu trabajo.
+
+Estas rutinas son hábitos que deberías incorporar desde el primer día. Con el tiempo se vuelven automáticas, como guardar un documento con `Ctrl+S`.
+
+---
+
+### Rutina de apertura (mañana)
+
+Antes de escribir una sola línea de código, asegúrate de estar trabajando con la versión más reciente del proyecto:
+
+```bash
+# 1. Ir a la rama principal
+git switch main
+
+# 2. Traer los cambios que tus compañeros subieron
+git pull
+
+# 3. Ir a tu rama de trabajo (o crear una nueva)
+git switch mi-rama
+# o si empiezas una tarea nueva:
+git switch -c tu-nombre/nueva-tarea
+```
+
+<Callout type="tip" title="¿Por qué es importante?">
+  Si te saltas el `git pull`, podrías estar trabajando sobre una versión vieja del proyecto. Cuando intentes subir tus cambios, tendrás conflictos innecesarios que te van a hacer perder tiempo.
+</Callout>
+
+---
+
+### Rutina de cierre (antes de apagar el computador)
+
+Esta es la rutina más importante. **Úsala siempre antes de irte**, incluso si tu código está a medias o el script tira errores. La meta no es entregar algo perfecto, sino respaldar tu progreso en la nube.
+
+**Paso 1: Mirar qué vas a guardar**
+
+Antes de subir nada, dale una mirada rápida a los archivos que modificaste. Este es el "ojo clínico" para asegurarte de que no estás subiendo un `.csv` o `.xlsx` por accidente (si te saltaste el `.gitignore`).
+
+```bash
+git status
+```
+
+Si ves archivos de datos en rojo, ¡alto ahí! No los subas. Agrégalos al `.gitignore` primero.
+
+**Paso 2: Empaquetar tus cambios**
+
+Selecciona los scripts o archivos en los que trabajaste hoy:
+
+```bash
+git add scripts/03_analisis_descriptivo.R
+```
+
+**Paso 3: El commit de "fin de día" (WIP)**
+
+Si tu tarea está terminada, pon un mensaje normal. Pero si dejas un script a medias o con un error que vas a arreglar mañana, usa el prefijo **WIP** (Work In Progress / Trabajo en progreso). Esto le avisa a tus colegas que ese código es un borrador:
+
+```bash
+# Tarea terminada:
+git commit -m "Agrega análisis descriptivo de variables clínicas"
+
+# Tarea a medias (WIP):
+git commit -m "WIP: avance en cruce de datos, falta revisar valores nulos"
+```
+
+**Paso 4: Enviar a la nube (vital)**
+
+Este es el paso que realmente respalda tu trabajo. Si no haces esto, tus avances siguen atrapados en tu disco duro:
+
+```bash
+# Si es la primera vez que subes esta rama:
+git push -u origin tu-nombre/analisis-datos
+
+# Si ya la habías subido antes:
+git push
+```
+
+---
+
+### Rutina de fin de semana
+
+Los viernes (o el último día antes de un feriado largo) hay un paso extra: asegúrate de que tu trabajo esté no solo respaldado, sino **comprensible** para otro humano.
+
+```bash
+# 1. Rutina de cierre normal
+git status
+git add .
+git commit -m "WIP: estado actual del análisis antes del fin de semana"
+git push
+
+# 2. (Opcional) Dejar una nota en el PR o en un issue
+# Si tienes un Pull Request abierto, deja un comentario
+# explicando en qué quedaste y qué falta
+```
+
+<Callout type="info" title="Piensa en tu yo del lunes">
+  El lunes vas a abrir tu computador y no vas a recordar en qué estabas. Un buen mensaje de commit WIP o un comentario en el PR te ahorra 30 minutos de "¿dónde quedé?".
+</Callout>
+
+---
+
+### El día completo en 3 líneas
+
+Para pegar en un post-it junto a tu pantalla:
+
+```
+☀️  Mañana:  git switch main → git pull → git switch mi-rama
+💻  Día:     Escribir código sin tocar los archivos de datos originales
+🌙  Tarde:   git status → git add → git commit → git push
+```
+
+<Callout type="warning" title="¿Y si me fui sin hacer push?">
+  No pasa nada grave (tus commits locales siguen ahí), pero pierdes la protección de la nube. Al día siguiente, lo primero que haces es el push pendiente **antes** de seguir trabajando. El hábito se forma con la repetición: después de unas semanas se vuelve automático.
+</Callout>
+
+<Callout type="tip" title="Regla para equipos">
+  Si lideras un equipo, establece la regla: **nada queda solo en local al final del día**. No importa si el código está incompleto — un commit WIP respaldado en GitHub es infinitamente mejor que código perfecto que solo existe en el disco duro de alguien.
+</Callout>

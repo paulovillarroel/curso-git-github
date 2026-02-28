@@ -1,445 +1,297 @@
 import Callout from '../components/Callout.astro';
 import CommandTable from '../components/CommandTable.astro';
 
-## GitHub es como Google Drive pero para código
+## Las ramas son como universos paralelos
 
-Hasta ahora, todo lo que has hecho con Git es **local**: vive solo en tu computador. Si tu disco duro muere mañana, pierdes todo.
+Imagina que eres un científico y quieres probar una idea loca. No vas a experimentar en tu laboratorio principal (podrías romper algo), así que creas un **laboratorio paralelo**. Si el experimento funciona, traes los resultados al laboratorio principal. Si no funciona, simplemente cierras el laboratorio paralelo y todo sigue igual.
 
-**GitHub** es un servicio en la nube donde puedes subir tus repositorios Git. Piensa en la diferencia así:
+Eso es exactamente lo que hacen las **ramas** en Git.
 
-- **Git** = la herramienta que instalaste en tu computador (la cámara de fotos)
-- **GitHub** = un servicio web donde subes tus repositorios (Instagram para código)
+```
+        main:    A --- B --- C
+                              \
+        feature:               D --- E
+```
 
-GitHub te da dos cosas fundamentales:
-1. **Respaldo**: Tu código está seguro en la nube
-2. **Colaboración**: Otras personas pueden ver, descargar y contribuir a tu código
-
----
-
-### Crear tu cuenta en GitHub
-
-Si todavía no tienes cuenta:
-
-1. Ve a [github.com](https://github.com) y haz clic en "Sign up"
-2. Usa el **mismo correo** que configuraste en Git (Módulo 2)
-3. Elige un nombre de usuario que te guste (será tu identidad como desarrollador)
-4. Completa el proceso de verificación
+En este diagrama, `main` es tu laboratorio principal con los commits A, B y C. Luego creaste una rama `feature` donde hiciste los commits D y E. **Mientras trabajas en `feature`, `main` no se ve afectado para nada.**
 
 ---
 
-### Crear un repositorio en GitHub
+### `git branch` — Ver en qué universo estás
 
-Vamos a crear un repositorio vacío en GitHub para subir nuestro proyecto:
+`git branch` te muestra todas las ramas que existen y marca con un asterisco (`*`) en la que estás parado.
 
-1. En GitHub, haz clic en el botón verde **"New"** (o en el `+` de la esquina superior derecha → "New repository")
-2. Ponle un nombre (ejemplo: `mi-receta`)
-3. **NO** marques "Add a README file" (queremos un repo vacío)
-4. **NO** selecciones un `.gitignore` ni licencia por ahora
-5. Haz clic en **"Create repository"**
+```bash
+git branch
+# * main
+```
 
-GitHub te mostrará una página con instrucciones. Esas instrucciones son exactamente lo que haremos a continuación.
+Solo tenemos una rama: `main`. Y el `*` nos dice que estamos ahí.
 
 ---
 
-### Configurar autenticación
+### `git switch -c` — Crear un laboratorio nuevo
 
-Para que Git pueda subir código a GitHub, necesitas autenticarte. La forma más fácil para principiantes:
+`git switch -c` crea una rama nueva **y** te mueve a ella automáticamente. La `-c` viene de "create" (crear).
 
-<Callout type="tip" title="Opción recomendada: GitHub CLI (gh)">
-  La forma más fácil de autenticarte es con GitHub CLI:
+```bash
+# Crear una nueva rama y movernos a ella
+git switch -c feature/saludo
+# Switched to a new branch 'feature/saludo'
 
-  **Instalar en WSL/Linux (Ubuntu 24.04):**
-  ```bash
-  sudo apt update
-  sudo apt install gh
-  ```
+git branch
+#   main
+# * feature/saludo
+```
 
-  Si `apt` no encuentra el paquete `gh`, visita <a href="https://cli.github.com/" target="_blank" rel="noopener noreferrer">cli.github.com</a> para ver cómo agregar el repositorio oficial de GitHub CLI a tu sistema.
+Ahora estás en la rama `feature/saludo`. Todo lo que hagas aquí (commits, cambios) NO afecta a `main`.
 
-  **Instalar en macOS:**
-  ```bash
-  brew install gh
-  ```
+<Callout type="tip" title="Nombres descriptivos para tus ramas">
+  Usa nombres que digan qué estás haciendo:
 
-  **Autenticarte:**
-  ```bash
-  gh auth login
-  ```
+  - `feature/login` — estás creando la funcionalidad de login
+  - `fix/error-calculo` — estás arreglando un error en un cálculo
+  - `mejora/diseño-header` — estás mejorando el diseño del header
 
-  Sigue las instrucciones en pantalla: elige "GitHub.com", "HTTPS", y "Login with a web browser". Se abrirá tu navegador para autorizar.
-</Callout>
-
-<Callout type="info" title="Alternativa: Token personal (HTTPS)">
-  Si prefieres no instalar `gh`, puedes crear un token personal:
-
-  1. En GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
-  2. "Generate new token (classic)"
-  3. Dale un nombre, selecciona el permiso `repo`, y genera el token
-  4. **Copia el token** (solo lo ves una vez)
-  5. Cuando Git te pida contraseña, usa el token en vez de tu contraseña
-
-  También puedes guardar el token para no tenerlo que poner cada vez:
-  ```bash
-  git config --global credential.helper store
-  ```
-
-  **Advertencia:** `credential.helper store` guarda tu token en un archivo de texto sin encriptar en tu computador (`~/.git-credentials`). Es cómodo para practicar, pero en un entorno profesional o compartido es mejor usar `gh auth login` o un gestor de credenciales seguro.
-</Callout>
-
-<Callout type="info" title="SSH es más avanzado">
-  Existe otra forma de autenticación llamada SSH que es más segura y no requiere poner contraseña cada vez. No la cubrimos aquí, pero funciona igual de bien. Si te interesa, puedes buscarlo en la documentación oficial de GitHub más adelante.
+  Evita nombres genéricos como `test`, `prueba` o `rama1`.
 </Callout>
 
 ---
 
-### `git remote add origin` — Conectar tu carpeta con la nube
+### Trabajar en tu rama
 
-Ahora necesitamos decirle a Git local: "este proyecto se conecta con este repositorio de GitHub". Eso se hace con `git remote`.
-
-```bash
-# Conectar tu repo local con GitHub
-git remote add origin https://github.com/tu-usuario/mi-receta.git
-```
-
-¿Qué significa cada parte?
-- `git remote add`: "agrega una conexión remota"
-- `origin`: es un **nombre** para esa conexión (es convención usar "origin" para la principal)
-- `https://github.com/...`: la URL de tu repositorio en GitHub
-
-Para verificar que la conexión se creó:
+Una vez en tu rama, el flujo es exactamente el mismo que aprendiste: editar → `git add` → `git commit`.
 
 ```bash
-git remote -v
-# origin  https://github.com/tu-usuario/mi-receta.git (fetch)
-# origin  https://github.com/tu-usuario/mi-receta.git (push)
+# Estamos en feature/saludo
+echo "¡Hola Mundo desde Git!" > saludo.txt
+git add saludo.txt
+git commit -m "Agrega archivo de saludo"
+
+# Hacer otro cambio
+echo "Bienvenido al curso de Git" >> saludo.txt
+git add saludo.txt
+git commit -m "Agrega mensaje de bienvenida al saludo"
 ```
 
-Si ves las dos líneas (fetch y push), la conexión está lista.
+Estos commits solo existen en `feature/saludo`. La rama `main` no sabe nada de ellos.
 
 ---
 
-### `git push -u origin main` — Subir tu trabajo a la nube
+### `git switch main` — Volver a la realidad
 
-¡El momento de la verdad! `git push` sube tus commits locales a GitHub.
-
-```bash
-# Primera vez: necesitas el -u para establecer la conexión
-git push -u origin main
-# Enumerating objects: 6, done.
-# Counting objects: 100% (6/6), done.
-# Writing objects: 100% (6/6), 523 bytes | 523.00 KiB/s, done.
-# Total 6 (delta 0), reused 0 (delta 0)
-# To https://github.com/tu-usuario/mi-receta.git
-#  * [new branch]      main -> main
-# Branch 'main' set up to track remote branch 'main' from 'origin'.
-```
-
-¿Qué significa `-u`? Le dice a Git "recuerda que `main` local se conecta con `main` en GitHub". Después de la primera vez, solo necesitas:
+Cuando vuelves a `main`, tus archivos cambian para reflejar el estado de `main`. Es como magia.
 
 ```bash
-git push
-# (sin -u, sin origin, sin main, Git ya recuerda)
+# Volver a main
+git switch main
+# Switched to branch 'main'
+
+# Verificar: ¿existe saludo.txt?
+ls
+# receta.txt
+# (¡No hay saludo.txt! Solo existe en la otra rama)
 ```
 
-¡Ve a GitHub en tu navegador y actualiza la página de tu repositorio! Deberías ver tus archivos ahí.
+<Callout type="info" title="¡No te asustes!">
+  Tus cambios no se perdieron. Están seguros en la rama `feature/saludo`. Si vuelves a ella con `git switch feature/saludo`, el archivo `saludo.txt` reaparece. Git mueve los archivos automáticamente según la rama en la que estés.
+</Callout>
 
 ---
 
-### `git clone` — Descargar un proyecto de internet
+### `git merge` — Traer el experimento exitoso a la realidad
 
-`git clone` descarga una copia completa de un repositorio de GitHub a tu computador. Ya viene con todo configurado: la conexión remota, el historial de commits, todo.
+Cuando estás satisfecho con tu trabajo en una rama, puedes **mezclar** (merge) esos cambios en `main`. Es como decir: "el experimento funcionó, traigan todo al laboratorio principal".
+
+**Importante:** Primero debes estar en la rama que **recibe** los cambios (generalmente `main`).
 
 ```bash
-# Clonar un repositorio
-git clone https://github.com/usuario/nombre-repo.git
-# Cloning into 'nombre-repo'...
-# remote: Enumerating objects: 20, done.
-# ...
+# 1. Asegúrate de estar en main
+git switch main
 
-# Entrar al repo clonado
-cd nombre-repo
+# 2. Traer los cambios de feature/saludo
+git merge feature/saludo
+# Updating a1b2c3d..e5f6a7b
+# Fast-forward
+#  saludo.txt | 2 ++
+#  1 file changed, 2 insertions(+)
+#  create mode 100644 saludo.txt
 
-# Ya tiene todo configurado
-git remote -v
-# origin  https://github.com/usuario/nombre-repo.git (fetch)
-# origin  https://github.com/usuario/nombre-repo.git (push)
+# 3. Verificar
+ls
+# receta.txt  saludo.txt   ← ¡ahora saludo.txt está en main!
 
 git log --oneline
-# (todo el historial del proyecto)
+# e5f6a7b Agrega mensaje de bienvenida al saludo
+# d4e5f6a Agrega archivo de saludo
+# ... (commits anteriores de main)
 ```
 
 ---
 
-### Fork — Tu propia copia de un proyecto ajeno
+### Conflictos de merge
 
-Un **fork** es una copia completa de un repositorio de otra persona en **tu cuenta** de GitHub. Es diferente a clonar:
+A veces, cuando intentas hacer merge, Git encuentra un **conflicto**: dos ramas modificaron la misma línea del mismo archivo, y Git no sabe cuál elegir.
 
-- **Clone**: descarga un repo a tu computador (copia local)
-- **Fork**: crea una copia del repo en tu cuenta de GitHub (copia en la nube)
+**Esto no es un error.** Es Git pidiendo tu ayuda para decidir.
 
-¿Para qué sirve? Imagina que encuentras un proyecto open source que quieres mejorar. No puedes hacer push directamente al repo de otra persona (no tienes permisos), pero puedes:
+Así se ve un archivo con conflicto:
 
-1. **Hacer fork** del proyecto (ahora tienes tu propia copia en GitHub)
-2. **Clonar tu fork** a tu computador
-3. Hacer tus cambios y push a **tu fork**
-4. Crear un Pull Request desde tu fork al proyecto original
-
-**Cómo hacer un fork:**
-
-1. Ve al repositorio en GitHub que quieres copiar
-2. Haz clic en el botón **"Fork"** (esquina superior derecha)
-3. Selecciona tu cuenta como destino
-4. ¡Listo! Ahora tienes una copia en `github.com/tu-usuario/nombre-repo`
-
-**Trabajar con tu fork:**
-
-```bash
-# 1. Clonar TU fork (no el repo original)
-git clone https://github.com/tu-usuario/nombre-repo.git
-cd nombre-repo
-
-# Verificar: origin apunta a TU fork
-git remote -v
-# origin  https://github.com/tu-usuario/nombre-repo.git (fetch)
-# origin  https://github.com/tu-usuario/nombre-repo.git (push)
-
-# 2. Crear una rama para tu contribución (nunca trabajes en main)
-git switch -c feature/mi-mejora
-
-# 3. Hacer tus cambios, add y commit
-echo "Mi mejora" >> archivo.txt
-git add archivo.txt
-git commit -m "Agrega mejora al archivo"
-
-# 4. Subir la rama a TU fork
-git push -u origin feature/mi-mejora
+```
+<<<<<<< HEAD
+Pasta con salsa de tomate
+=======
+Pasta con salsa boloñesa
+>>>>>>> feature/nueva-receta
 ```
 
-Después ve a GitHub y crea un **Pull Request** desde tu fork al repositorio original. GitHub detecta automáticamente la rama que subiste y te ofrece crear el PR. En el Módulo 7 verás este flujo en detalle.
+Los marcadores significan:
+- `<<<<<<< HEAD`: lo que tiene tu rama actual (main)
+- `=======`: separador
+- `>>>>>>> feature/nueva-receta`: lo que tiene la otra rama
 
-**Mantener tu fork actualizado:**
+**Cómo resolver un conflicto paso a paso:**
 
-Con el tiempo, el proyecto original seguirá avanzando. Para traer esos cambios a tu fork:
+1. **Abre el archivo** en tu editor de texto
+2. **Decide qué mantener**: elimina los tres marcadores (`<<<<<<<`, `=======`, `>>>>>>>`) y deja solo el contenido correcto
+3. **Guarda** el archivo
+4. **Haz add y commit**:
 
 ```bash
-# Agregar una conexión al repo original (se hace una sola vez)
-git remote add upstream https://github.com/autor-original/nombre-repo.git
-
-# Traer los cambios del original y actualizar tu fork
-git fetch upstream
-git switch main
-git merge upstream/main
-git push
-# Ahora tu fork está al día con el proyecto original
+# Después de editar el archivo y resolver el conflicto
+git add receta.txt
+git commit -m "Resuelve conflicto: elige salsa boloñesa"
 ```
 
-`upstream` es el nombre convencional para el repositorio original (el que forkeaste). `origin` sigue siendo tu fork.
-
-<Callout type="tip" title="Fork vs Clone: ¿cuándo usar cada uno?">
-  - **Clone**: cuando quieres descargar un repo para verlo o usarlo localmente
-  - **Fork**: cuando quieres hacer cambios y eventualmente proponerlos al proyecto original, o cuando quieres tu propia versión independiente de un proyecto
+<Callout type="tip" title="Los conflictos NO son errores">
+  Los conflictos son normales y esperables cuando trabajas con ramas. Git simplemente te pide ayuda para decidir qué versión mantener. No te asustes cuando veas uno.
 </Callout>
 
 ---
 
-### `git fetch` — Preguntar si hay novedades
+### `git branch -d` — Limpieza de ramas
 
-`git fetch` revisa si hay cambios nuevos en GitHub **sin aplicarlos** a tus archivos. Es como mirar el buzón sin abrir las cartas.
+Cuando una rama ya fue mergeada, **debes borrarla**. Una rama que ya cumplió su propósito no tiene razón de seguir existiendo. Dejarla ahí solo genera confusión: con el tiempo, el repositorio se llena de ramas viejas y nadie sabe cuáles están activas y cuáles son basura.
 
-```bash
-git fetch
-# Si hay cambios nuevos, te muestra información
-# Si no hay cambios, no muestra nada
-```
-
-Es útil para verificar si alguien más subió cambios antes de traerlos.
-
----
-
-### `git pull` — Traer las novedades y aplicarlas
-
-`git pull` es como `git fetch` + `git merge`: descarga los cambios de GitHub **y** los aplica a tus archivos locales.
+La regla es simple: **rama mergeada = rama borrada**.
 
 ```bash
-git pull
-# Already up to date.
-# (o te muestra los archivos que se actualizaron)
+# Borrar la rama local (solo funciona si ya fue mergeada)
+git branch -d feature/saludo
+# Deleted branch feature/saludo (was e5f6a7b).
 ```
 
-<Callout type="warning" title="Siempre haz commit antes de pull">
-  Antes de hacer `git pull`, asegúrate de haber hecho commit de todos tus cambios locales. Si tienes cambios sin guardar y los cambios remotos tocan los mismos archivos, podrías tener conflictos difíciles de resolver.
+La `-d` (de "delete") es la forma **segura** de borrar: Git verifica que la rama ya fue mergeada antes de borrarla. Si no fue mergeada, te avisa para que no pierdas trabajo accidentalmente.
+
+Si la rama también fue subida a GitHub, necesitas borrarla en el remoto también:
+
+```bash
+# Borrar la rama en GitHub
+git push origin --delete feature/saludo
+```
+
+<Callout type="tip" title="Limpieza completa después de un merge">
+  Acostúmbrate a este flujo cada vez que termines con una rama:
 
   ```bash
-  # Antes de pull, siempre:
-  git status
-  # Si hay cambios pendientes:
-  git add .
-  git commit -m "Guarda cambios antes de pull"
-  # Ahora sí:
-  git pull
+  # 1. Borrar la rama local
+  git branch -d feature/saludo
+
+  # 2. Borrar la rama remota (si la subiste a GitHub)
+  git push origin --delete feature/saludo
   ```
+
+  En GitHub, cuando mergeas un Pull Request, te ofrece un botón para borrar la rama remota automáticamente. Úsalo siempre.
 </Callout>
 
----
+<Callout type="warning" title="¿Y si no la mergeé pero quiero borrarla igual?">
+  Si decidiste descartar una rama experimental que no funcionó, Git no te dejará borrarla con `-d` porque detecta que perderías trabajo. Si estás seguro de que quieres borrarla, usa `-D` (mayúscula):
 
-### Flujo completo: de la idea a GitHub
+  ```bash
+  git branch -D feature/experimento-fallido
+  ```
 
-Este es el flujo más importante que aprenderás. Conecta todo lo que viste en el Módulo 3 (repositorio local) con GitHub. Sigue cada paso en orden:
-
-**Paso 1: Crear la carpeta del proyecto e inicializar Git**
-
-```bash
-mkdir mi-proyecto-web && cd mi-proyecto-web
-git init
-```
-
-**Paso 2: Crear `.gitignore` y hacer el primer commit**
-
-Siempre crea el `.gitignore` antes de empezar a trabajar (como aprendiste en el Módulo 3):
-
-```bash
-cat > .gitignore << 'EOF'
-.DS_Store
-Thumbs.db
-.env
-node_modules/
-*.tmp
-*.log
-EOF
-
-git add .gitignore
-git commit -m "Agrega .gitignore"
-```
-
-**Paso 3: Crear los archivos del proyecto y hacer el segundo commit**
-
-```bash
-echo "<!DOCTYPE html><html><body><h1>Hola Mundo</h1></body></html>" > index.html
-echo "body { font-family: sans-serif; }" > estilos.css
-
-git add index.html estilos.css
-git commit -m "Crea estructura básica del sitio web"
-```
-
-**Paso 4: Crear un repositorio vacío en GitHub**
-
-1. En GitHub, haz clic en el botón **"+"** (esquina superior derecha) → **"New repository"**
-2. Ponle el nombre **`mi-proyecto-web`**
-3. **NO** marques "Add a README file"
-4. **NO** selecciones un `.gitignore` template
-5. **NO** selecciones una licencia
-6. Haz clic en **"Create repository"**
-
-GitHub te mostrará una página con instrucciones. Los comandos que necesitas son los de la sección "push an existing repository".
-
-<Callout type="warning" title="¡Crea el repo vacío!">
-  Si marcas la casilla "Add a README file", GitHub creará un commit inicial que tu repo local no tiene. Cuando intentes hacer push, tendrás un conflicto. Siempre crea el repo **sin ningún archivo** cuando vas a subir un proyecto existente.
+  Esto fuerza el borrado. Úsalo solo cuando estés seguro de que no necesitas esos cambios.
 </Callout>
-
-**Paso 5: Autenticarte (si no lo has hecho antes)**
-
-```bash
-gh auth login
-# Sigue las instrucciones: GitHub.com → HTTPS → Login with a web browser
-```
-
-Si ya te autenticaste antes, este paso no es necesario.
-
-**Paso 6: Conectar tu repo local con GitHub**
-
-```bash
-git remote add origin https://github.com/tu-usuario/mi-proyecto-web.git
-
-# Verificar la conexión
-git remote -v
-# origin  https://github.com/tu-usuario/mi-proyecto-web.git (fetch)
-# origin  https://github.com/tu-usuario/mi-proyecto-web.git (push)
-```
-
-**Paso 7: Subir tu código a GitHub por primera vez**
-
-```bash
-git push -u origin main
-# Enumerating objects: 8, done.
-# ...
-# To https://github.com/tu-usuario/mi-proyecto-web.git
-#  * [new branch]      main -> main
-# Branch 'main' set up to track remote branch 'main' from 'origin'.
-```
-
-El `-u` le dice a Git "recuerda que `main` local se conecta con `main` en GitHub".
-
-**Paso 8: Verificar en GitHub**
-
-Abre tu navegador, ve a `github.com/tu-usuario/mi-proyecto-web` y actualiza la página. Deberías ver tus archivos (`index.html`, `estilos.css`, `.gitignore`) y tus commits.
-
-**Paso 9: Hacer un cambio, commit y push (flujo del día a día)**
-
-A partir de ahora, el flujo diario es mucho más simple:
-
-```bash
-# Editar un archivo
-echo "<p>Bienvenido a mi sitio</p>" >> index.html
-
-# El flujo de siempre: status → add → commit
-git add index.html
-git commit -m "Agrega mensaje de bienvenida"
-
-# Subir a GitHub (ya no necesitas -u ni origin ni main)
-git push
-```
-
-¡Eso es todo! A partir del primer push con `-u`, solo necesitas `git push` para subir tus nuevos commits.
 
 ---
 
 ### Tabla resumen
 
 <CommandTable commands={[
-  { command: "git remote add origin <URL>", description: "Conectar repo local con GitHub" },
-  { command: "git remote -v", description: "Ver las conexiones remotas configuradas" },
-  { command: "git push -u origin main", description: "Subir código a GitHub (primera vez)" },
-  { command: "git push", description: "Subir código a GitHub (siguientes veces)" },
-  { command: "git clone <URL>", description: "Descargar un repositorio de GitHub" },
-  { command: "Fork (botón en GitHub)", description: "Crear tu propia copia de un repo ajeno" },
-  { command: "git fetch", description: "Revisar si hay cambios nuevos (sin aplicar)" },
-  { command: "git pull", description: "Descargar y aplicar cambios de GitHub" },
+  { command: "git branch", description: "Listar ramas y ver la actual (*)" },
+  { command: "git switch -c nombre-rama", description: "Crear una rama nueva y moverte a ella" },
+  { command: "git switch nombre-rama", description: "Cambiar de rama" },
+  { command: "git merge nombre-rama", description: "Traer los cambios de una rama a la actual" },
+  { command: "git branch -d nombre-rama", description: "Borrar una rama local ya mergeada" },
+  { command: "git push origin --delete nombre-rama", description: "Borrar una rama remota en GitHub" },
+  { command: "git branch -D nombre-rama", description: "Forzar borrado de rama no mergeada" },
 ]} />
 
 ---
 
 ### Ejercicios del módulo
 
-**Ejercicio 1:** Crea un repositorio vacío en GitHub (sin README, sin .gitignore). Anota la URL que te da.
-
-**Ejercicio 2:** Conecta tu repo local de práctica con GitHub:
+**Ejercicio 1:** Crea una rama `feature/despedida`, agrega un archivo `despedida.txt` con algún contenido, y haz commit:
 
 ```bash
-git remote add origin https://github.com/tu-usuario/tu-repo.git
-git remote -v
-# ¿Ves las dos líneas (fetch y push)?
+git switch -c feature/despedida
+echo "¡Adiós desde una rama!" > despedida.txt
+git add despedida.txt
+git commit -m "Agrega archivo de despedida"
 ```
 
-**Ejercicio 3:** Sube tu trabajo con `git push -u origin main`:
+**Ejercicio 2:** Vuelve a `main` y verifica que el archivo `despedida.txt` NO está:
 
 ```bash
-git push -u origin main
-```
-
-**Ejercicio 4:** Ve a GitHub en tu navegador y verifica que tus archivos están ahí. ¿Puedes ver los commits? ¿Los archivos?
-
-**Ejercicio 5:** Clona un repositorio público a tu máquina. Puedes clonar el repositorio de este mismo curso:
-
-```bash
-cd ~
-git clone https://github.com/paulovillarroel/curso-git-github.git curso-git-github-copia
-cd curso-git-github-copia
+git switch main
 ls
-git log --oneline
+# ¿Ves despedida.txt? No debería estar
 ```
 
-**Ejercicio 6:** Haz fork de un repositorio público: ve a cualquier repo en GitHub, haz clic en "Fork", clona **tu fork** y verifica con `git remote -v` que apunta a tu cuenta.
+**Ejercicio 3:** Mergea la rama a `main` y verifica que el archivo AHORA SÍ está:
 
-<Callout type="info" title="¡Tu código está en la nube!">
-  Ahora tienes un respaldo de tu trabajo en GitHub. Si tu computador se pierde, tu código sigue a salvo. Además, cualquier persona puede ver y clonar tu repositorio público. Y con fork, puedes contribuir a cualquier proyecto open source. ¡Eso es el poder de GitHub!
+```bash
+git merge feature/despedida
+ls
+# Ahora despedida.txt debería aparecer
+```
+
+**Ejercicio 4:** Borra la rama con `git branch -d`:
+
+```bash
+git branch -d feature/despedida
+git branch
+# Solo debería quedar main
+```
+
+**Ejercicio 5 (Desafío):** Crea un conflicto a propósito y resuélvelo:
+
+```bash
+# Crear un archivo base
+echo "Color favorito: azul" > preferencias.txt
+git add . && git commit -m "Agrega preferencias"
+
+# Crear una rama y cambiar el color
+git switch -c feature/color
+echo "Color favorito: rojo" > preferencias.txt
+git add . && git commit -m "Cambia color a rojo"
+
+# Volver a main y cambiar el color diferente
+git switch main
+echo "Color favorito: verde" > preferencias.txt
+git add . && git commit -m "Cambia color a verde"
+
+# Intentar merge (¡conflicto!)
+git merge feature/color
+# CONFLICT (content): Merge conflict in preferencias.txt
+
+# Abre preferencias.txt, resuelve el conflicto, luego:
+git add preferencias.txt
+git commit -m "Resuelve conflicto: elige color verde"
+git branch -d feature/color
+```
+
+<Callout type="info" title="¡Las ramas son tu superpoder!">
+  Con ramas puedes experimentar libremente sin miedo. Crea tantas ramas como quieras para probar ideas. Si funcionan, las mergeas. Si no, las borras. Así de simple.
 </Callout>

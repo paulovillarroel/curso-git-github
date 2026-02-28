@@ -1,340 +1,168 @@
 import Callout from '../components/Callout.astro';
 import CommandTable from '../components/CommandTable.astro';
 
-## Las ramas son como universos paralelos
+## Git es tu red de seguridad
 
-Imagina que eres un científico y quieres probar una idea loca. No vas a experimentar en tu laboratorio principal (podrías romper algo), así que creas un **laboratorio paralelo**. Si el experimento funciona, traes los resultados al laboratorio principal. Si no funciona, simplemente cierras el laboratorio paralelo y todo sigue igual.
+Si el experimento falla, siempre puedes volver atrás. Esa es la gran promesa de Git: que puedes experimentar sin miedo porque nada se pierde de verdad (siempre y cuando hagas commits).
 
-Eso es exactamente lo que hacen las **ramas** en Git.
-
-```
-        main:    A --- B --- C
-                              \
-        feature:               D --- E
-```
-
-En este diagrama, `main` es tu laboratorio principal con los commits A, B y C. Luego creaste una rama `feature` donde hiciste los commits D y E. **Mientras trabajas en `feature`, `main` no se ve afectado para nada.**
+En este módulo vas a aprender a viajar en el tiempo por tu proyecto, deshacer errores y corregir metidas de pata. Todos cometemos errores, y Git está diseñado para eso.
 
 ---
 
-### `git branch` — Ver en qué universo estás
+### `git log --oneline` — Repaso: tu mapa del tiempo
 
-`git branch` te muestra todas las ramas que existen y marca con un asterisco (`*`) en la que estás parado.
+Antes de viajar, necesitas saber a dónde puedes ir. Cada commit tiene un **hash** único: esos 7 caracteres raros al inicio de cada línea.
 
 ```bash
-git branch
-# * main
+git log --oneline
+# d4e5f6a Agrega instrucciones de preparación
+# b2c3d4e Agrega lista de ingredientes
+# a1b2c3d Agrega receta inicial de pasta
 ```
 
-Solo tenemos una rama: `main`. Y el `*` nos dice que estamos ahí.
+Esos hashes (`d4e5f6a`, `b2c3d4e`, `a1b2c3d`) son como las coordenadas de cada punto en el tiempo. Los vas a usar para decirle a Git a dónde quieres ir.
 
 ---
 
-### `git switch -c` — Crear un laboratorio nuevo
+### `git switch --detach` — Modo turista al pasado
 
-`git switch -c` crea una rama nueva **y** te mueve a ella automáticamente. La `-c` viene de "create" (crear).
+¿Quieres ver cómo era tu proyecto hace 3 commits? `git switch --detach` te lleva ahí como un turista: puedes mirar pero no deberías cambiar nada.
 
 ```bash
-# Crear una nueva rama y movernos a ella
-git switch -c feature/saludo
-# Switched to a new branch 'feature/saludo'
+# Viajar al primer commit
+git switch --detach a1b2c3d
+# HEAD is now at a1b2c3d Agrega receta inicial de pasta
 
-git branch
-#   main
-# * feature/saludo
+# Ahora tu proyecto está exactamente como estaba en ese momento
+cat receta.txt
+# # Receta de Pasta
+# (solo la primera línea, porque los ingredientes se agregaron después)
 ```
 
-Ahora estás en la rama `feature/saludo`. Todo lo que hagas aquí (commits, cambios) NO afecta a `main`.
+Piensa en esto como visitar un museo: puedes mirar todo, pero si quieres hacer cambios permanentes, deberías volver a tu rama primero.
 
-<Callout type="tip" title="Nombres descriptivos para tus ramas">
-  Usa nombres que digan qué estás haciendo:
+Git te va a mostrar un mensaje que dice **"HEAD detached"**. No te asustes, es normal. Significa que estás visitando el pasado pero no estás "parado" en ninguna rama.
 
-  - `feature/login` — estás creando la funcionalidad de login
-  - `fix/error-calculo` — estás arreglando un error en un cálculo
-  - `mejora/diseño-header` — estás mejorando el diseño del header
-
-  Evita nombres genéricos como `test`, `prueba` o `rama1`.
+<Callout type="info" title="Detached HEAD: puedes mirar (y técnicamente editar), pero ten cuidado">
+  Mientras estés en "detached HEAD", puedes explorar e incluso hacer commits. Pero esos commits **no pertenecen a ninguna rama**, así que si cambias de rama sin guardarlos, se perderán. Para explorar es completamente seguro. Si quieres hacer cambios permanentes, primero crea una rama con `git switch -c nombre-rama`.
 </Callout>
 
----
-
-### Trabajar en tu rama
-
-Una vez en tu rama, el flujo es exactamente el mismo que aprendiste: editar → `git add` → `git commit`.
+Para volver al presente:
 
 ```bash
-# Estamos en feature/saludo
-echo "¡Hola Mundo desde Git!" > saludo.txt
-git add saludo.txt
-git commit -m "Agrega archivo de saludo"
-
-# Hacer otro cambio
-echo "Bienvenido al curso de Git" >> saludo.txt
-git add saludo.txt
-git commit -m "Agrega mensaje de bienvenida al saludo"
-```
-
-Estos commits solo existen en `feature/saludo`. La rama `main` no sabe nada de ellos.
-
----
-
-### `git switch main` — Volver a la realidad
-
-Cuando vuelves a `main`, tus archivos cambian para reflejar el estado de `main`. Es como magia.
-
-```bash
-# Volver a main
 git switch main
 # Switched to branch 'main'
-
-# Verificar: ¿existe saludo.txt?
-ls
-# receta.txt
-# (¡No hay saludo.txt! Solo existe en la otra rama)
+# ¡De vuelta al presente! Tus archivos vuelven a su estado actual.
 ```
-
-<Callout type="info" title="¡No te asustes!">
-  Tus cambios no se perdieron. Están seguros en la rama `feature/saludo`. Si vuelves a ella con `git switch feature/saludo`, el archivo `saludo.txt` reaparece. Git mueve los archivos automáticamente según la rama en la que estés.
-</Callout>
 
 ---
 
-### `git merge` — Traer el experimento exitoso a la realidad
+### `git revert` — El antídoto seguro
 
-Cuando estás satisfecho con tu trabajo en una rama, puedes **mezclar** (merge) esos cambios en `main`. Es como decir: "el experimento funcionó, traigan todo al laboratorio principal".
-
-**Importante:** Primero debes estar en la rama que **recibe** los cambios (generalmente `main`).
+`git revert` es la forma **recomendada** de deshacer un cambio. Es como tachar algo con corrector en vez de arrancar la página: el error original sigue en la historia, pero creas un nuevo commit que lo deshace.
 
 ```bash
-# 1. Asegúrate de estar en main
-git switch main
-
-# 2. Traer los cambios de feature/saludo
-git merge feature/saludo
-# Updating a1b2c3d..e5f6a7b
-# Fast-forward
-#  saludo.txt | 2 ++
-#  1 file changed, 2 insertions(+)
-#  create mode 100644 saludo.txt
-
-# 3. Verificar
-ls
-# receta.txt  saludo.txt   ← ¡ahora saludo.txt está en main!
-
+# Supongamos que el último commit agregó algo que no querías
 git log --oneline
-# e5f6a7b Agrega mensaje de bienvenida al saludo
-# d4e5f6a Agrega archivo de saludo
-# ... (commits anteriores de main)
+# d4e5f6a Agrega instrucciones de preparación   ← este fue un error
+# b2c3d4e Agrega lista de ingredientes
+# a1b2c3d Agrega receta inicial de pasta
+
+# Revertir el último commit
+git revert d4e5f6a
+# Se abre tu editor para el mensaje del commit de reversión
+# (guarda y cierra el editor)
+
+# Ahora el historial tiene un commit nuevo que deshace el cambio
+git log --oneline
+# e5f6a7b Revert "Agrega instrucciones de preparación"
+# d4e5f6a Agrega instrucciones de preparación
+# b2c3d4e Agrega lista de ingredientes
+# a1b2c3d Agrega receta inicial de pasta
 ```
 
----
+¿Ves? El commit original sigue ahí (la historia no se borró), pero hay un nuevo commit que deshace sus cambios. Es la forma más limpia y segura.
 
-### Conflictos de merge
-
-A veces, cuando intentas hacer merge, Git encuentra un **conflicto**: dos ramas modificaron la misma línea del mismo archivo, y Git no sabe cuál elegir.
-
-**Esto no es un error.** Es Git pidiendo tu ayuda para decidir.
-
-Así se ve un archivo con conflicto:
-
-```
-<<<<<<< HEAD
-Pasta con salsa de tomate
-=======
-Pasta con salsa boloñesa
->>>>>>> feature/nueva-receta
-```
-
-Los marcadores significan:
-- `<<<<<<< HEAD`: lo que tiene tu rama actual (main)
-- `=======`: separador
-- `>>>>>>> feature/nueva-receta`: lo que tiene la otra rama
-
-**Cómo resolver un conflicto paso a paso:**
-
-1. **Abre el archivo** en tu editor de texto
-2. **Decide qué mantener**: elimina los tres marcadores (`<<<<<<<`, `=======`, `>>>>>>>`) y deja solo el contenido correcto
-3. **Guarda** el archivo
-4. **Haz add y commit**:
-
-```bash
-# Después de editar el archivo y resolver el conflicto
-git add receta.txt
-git commit -m "Resuelve conflicto: elige salsa boloñesa"
-```
-
-<Callout type="tip" title="Los conflictos NO son errores">
-  Los conflictos son normales y esperables cuando trabajas con ramas. Git simplemente te pide ayuda para decidir qué versión mantener. No te asustes cuando veas uno.
+<Callout type="tip" title="¿Cuándo usar revert?">
+  Usa `git revert` cuando ya compartiste tu código con otras personas (lo subiste a GitHub). Es seguro porque no borra historia, solo agrega un nuevo commit que deshace el cambio.
 </Callout>
 
 ---
 
-### `git rebase` — Otra forma de integrar cambios
+### `git reset --soft HEAD~1` — "Oops, me equivoqué en el mensaje"
 
-Merge no es la única forma de integrar cambios entre ramas. Existe otra herramienta llamada **rebase** que logra lo mismo, pero de una forma diferente.
-
-La diferencia clave es **cómo queda la historia**:
-
-- **Merge** crea un "nudo" en la historia: un commit especial de merge que une las dos ramas
-- **Rebase** "reescribe" la historia para que sea **lineal**, como si hubieras hecho tus cambios después de todo lo que pasó en main
-
-```
-Merge: crea un commit de merge (M) que une las ramas
-        main:    A --- B --- C --------- M
-                              \         /
-        feature:               D --- E
-
-Rebase: mueve tus commits para que empiecen desde la punta de main
-        main:    A --- B --- C
-                              \
-        feature:               D' --- E'
-```
-
-Con merge, la historia muestra "aquí se juntaron dos ramas". Con rebase, la historia queda limpia y lineal, como si la rama feature nunca hubiera existido por separado.
-
-**El comando básico:**
+¿Hiciste un commit pero te equivocaste en el mensaje? ¿O te olvidaste de agregar un archivo? `git reset --soft` deshace el commit pero **deja tus archivos intactos** en el staging.
 
 ```bash
-# Estando en tu rama feature
-git rebase main
+# Acabas de hacer un commit con un typo en el mensaje
+git log --oneline
+# f6a7b8c Agrega ingredentes   ← ups, "ingredentes" tiene un typo
+
+# Deshacer el commit (los archivos quedan en staging)
+git reset --soft HEAD~1
+
+# Verificar: los archivos siguen listos para commit
+git status
+# Changes to be committed:
+#   modified: receta.txt
+
+# Ahora puedes hacer el commit de nuevo con el mensaje correcto
+git commit -m "Agrega ingredientes"
 ```
 
-Esto "mueve" los commits de tu rama para que empiecen desde la punta de `main`. Tus commits D y E se convierten en D' y E' (copias con el mismo contenido pero en una nueva posición de la historia).
-
-<Callout type="warning" title="Regla de oro del rebase">
-  **Nunca hagas rebase de commits que ya compartiste** (que ya subiste con `git push`). Rebase reescribe la historia, y si alguien más ya tiene esos commits, van a tener problemas para sincronizar su trabajo. Si ya hiciste push, usa merge.
-</Callout>
-
-<Callout type="tip" title="¿Merge o rebase?">
-  Ambos logran lo mismo: integrar cambios de una rama a otra. **Merge** preserva la historia tal cual fue (con sus bifurcaciones y uniones). **Rebase** la simplifica (todo queda lineal). Para principiantes, merge es más seguro porque no reescribe la historia. Cuando te sientas cómodo con Git, prueba rebase — muchos equipos lo prefieren por mantener un historial más limpio.
-</Callout>
-
----
-
-### `git branch -d` — Limpieza de ramas
-
-Cuando una rama ya fue mergeada, **debes borrarla**. Una rama que ya cumplió su propósito no tiene razón de seguir existiendo. Dejarla ahí solo genera confusión: con el tiempo, el repositorio se llena de ramas viejas y nadie sabe cuáles están activas y cuáles son basura.
-
-La regla es simple: **rama mergeada = rama borrada**.
-
-```bash
-# Borrar la rama local (solo funciona si ya fue mergeada)
-git branch -d feature/saludo
-# Deleted branch feature/saludo (was e5f6a7b).
-```
-
-La `-d` (de "delete") es la forma **segura** de borrar: Git verifica que la rama ya fue mergeada antes de borrarla. Si no fue mergeada, te avisa para que no pierdas trabajo accidentalmente.
-
-Si la rama también fue subida a GitHub, necesitas borrarla en el remoto también:
-
-```bash
-# Borrar la rama en GitHub
-git push origin --delete feature/saludo
-```
-
-<Callout type="tip" title="Limpieza completa después de un merge">
-  Acostúmbrate a este flujo cada vez que termines con una rama:
-
-  ```bash
-  # 1. Borrar la rama local
-  git branch -d feature/saludo
-
-  # 2. Borrar la rama remota (si la subiste a GitHub)
-  git push origin --delete feature/saludo
-  ```
-
-  En GitHub, cuando mergeas un Pull Request, te ofrece un botón para borrar la rama remota automáticamente. Úsalo siempre.
-</Callout>
-
-<Callout type="warning" title="¿Y si no la mergeé pero quiero borrarla igual?">
-  Si decidiste descartar una rama experimental que no funcionó, Git no te dejará borrarla con `-d` porque detecta que perderías trabajo. Si estás seguro de que quieres borrarla, usa `-D` (mayúscula):
-
-  ```bash
-  git branch -D feature/experimento-fallido
-  ```
-
-  Esto fuerza el borrado. Úsalo solo cuando estés seguro de que no necesitas esos cambios.
-</Callout>
+¿Qué significa `HEAD~1`? Es como decir "un paso atrás desde donde estoy". `HEAD` es "donde estoy ahora" y `~1` es "menos uno".
 
 ---
 
 ### Tabla resumen
 
 <CommandTable commands={[
-  { command: "git branch", description: "Listar ramas y ver la actual (*)" },
-  { command: "git switch -c nombre-rama", description: "Crear una rama nueva y moverte a ella" },
-  { command: "git switch nombre-rama", description: "Cambiar de rama" },
-  { command: "git merge nombre-rama", description: "Traer los cambios de una rama a la actual" },
-  { command: "git rebase main", description: "Reescribir tu rama para que empiece desde la punta de main" },
-  { command: "git branch -d nombre-rama", description: "Borrar una rama local ya mergeada" },
-  { command: "git push origin --delete nombre-rama", description: "Borrar una rama remota en GitHub" },
-  { command: "git branch -D nombre-rama", description: "Forzar borrado de rama no mergeada" },
+  { command: "git log --oneline", description: "Ver historial compacto con hashes" },
+  { command: "git switch --detach <hash>", description: "Visitar un commit pasado (modo turista)" },
+  { command: "git switch main", description: "Volver al presente" },
+  { command: "git revert <hash>", description: "Deshacer un commit de forma segura (crea nuevo commit)" },
+  { command: "git reset --soft HEAD~1", description: "Deshacer el último commit, archivos quedan en staging" },
 ]} />
+
+| Comando | ¿Es seguro? | ¿Cuándo usarlo? |
+|---------|-------------|-----------------|
+| `git switch --detach` | Sí, para explorar | Para visitar el pasado (los commits que hagas aquí se pierden si no creas una rama) |
+| `git revert` | Sí, es la opción recomendada | Para deshacer un cambio manteniendo la historia |
+| `git reset --soft` | Sí, los archivos no se pierden | Para corregir un mensaje de commit o agregar archivos olvidados |
 
 ---
 
 ### Ejercicios del módulo
 
-**Ejercicio 1:** Crea una rama `feature/saludo`, agrega un archivo `saludo.txt` con algún contenido, y haz commit:
+**Ejercicio 1:** Crea un repo de práctica con 3 commits (uno por cada cambio en un archivo):
 
 ```bash
-git switch -c feature/saludo
-echo "¡Hola desde una rama!" > saludo.txt
-git add saludo.txt
-git commit -m "Agrega archivo de saludo"
+mkdir practica-tiempo && cd practica-tiempo
+git init
+echo "Línea 1: Hola" > archivo.txt
+git add . && git commit -m "Agrega línea 1"
+echo "Línea 2: Mundo" >> archivo.txt
+git add . && git commit -m "Agrega línea 2"
+echo "Línea 3: Git es genial" >> archivo.txt
+git add . && git commit -m "Agrega línea 3"
 ```
 
-**Ejercicio 2:** Vuelve a `main` y verifica que el archivo `saludo.txt` NO está:
+**Ejercicio 2:** Usa `git log --oneline` para ver el historial. Deberías ver 3 commits con sus hashes.
+
+**Ejercicio 3:** Viaja al primer commit con `git switch --detach <hash>` (usa el hash de tu primer commit). Mira el contenido del archivo con `cat archivo.txt`. ¿Solo tiene la línea 1? Vuelve al presente con `git switch main`.
+
+**Ejercicio 4:** Usa `git revert` para deshacer el último commit. Revisa con `git log --oneline` que se creó un nuevo commit de reversión. Verifica con `cat archivo.txt` que la línea 3 desapareció.
+
+**Ejercicio 5:** Haz un commit nuevo y luego deshazlo con `git reset --soft HEAD~1`. Verifica con `git status` que los archivos siguen en staging (en verde).
 
 ```bash
-git switch main
-ls
-# ¿Ves saludo.txt? No debería estar
+echo "Línea extra de prueba" >> archivo.txt
+git add . && git commit -m "Agrega línea extra"
+git reset --soft HEAD~1
+git status
+# Deberías ver los cambios en staging (verde)
 ```
 
-**Ejercicio 3:** Mergea la rama a `main` y verifica que el archivo AHORA SÍ está:
-
-```bash
-git merge feature/saludo
-ls
-# Ahora saludo.txt debería aparecer
-```
-
-**Ejercicio 4:** Borra la rama con `git branch -d`:
-
-```bash
-git branch -d feature/saludo
-git branch
-# Solo debería quedar main
-```
-
-**Ejercicio 5 (Desafío):** Crea un conflicto a propósito y resuélvelo:
-
-```bash
-# Crear un archivo base
-echo "Color favorito: azul" > preferencias.txt
-git add . && git commit -m "Agrega preferencias"
-
-# Crear una rama y cambiar el color
-git switch -c feature/color
-echo "Color favorito: rojo" > preferencias.txt
-git add . && git commit -m "Cambia color a rojo"
-
-# Volver a main y cambiar el color diferente
-git switch main
-echo "Color favorito: verde" > preferencias.txt
-git add . && git commit -m "Cambia color a verde"
-
-# Intentar merge (¡conflicto!)
-git merge feature/color
-# CONFLICT (content): Merge conflict in preferencias.txt
-
-# Abre preferencias.txt, resuelve el conflicto, luego:
-git add preferencias.txt
-git commit -m "Resuelve conflicto: elige color verde"
-git branch -d feature/color
-```
-
-<Callout type="info" title="¡Las ramas son tu superpoder!">
-  Con ramas puedes experimentar libremente sin miedo. Crea tantas ramas como quieras para probar ideas. Si funcionan, las mergeas. Si no, las borras. Así de simple.
+<Callout type="tip" title="¡No te preocupes si te equivocas!">
+  Estos ejercicios son para experimentar. Si algo sale mal, simplemente borra la carpeta (`cd .. && rm -rf practica-tiempo`) y empieza de nuevo. Esa es la belleza de los repos de práctica: puedes destruirlos sin consecuencias.
 </Callout>

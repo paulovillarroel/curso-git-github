@@ -1,427 +1,367 @@
 import Callout from '../components/Callout.astro';
 import CommandTable from '../components/CommandTable.astro';
 
-## Tu copiloto en la terminal: GitHub CLI y agentes de IA
+## Herramientas de poder para cuando ya dominas lo básico
 
-Hasta ahora has usado Git escribiendo cada comando a mano. Pero hay una herramienta que hace tu vida mucho más fácil: **GitHub CLI** (`gh`). Y cuando la combinas con **agentes de IA** en la terminal, tu productividad se multiplica.
+En los módulos anteriores aprendiste a trabajar con Git de forma segura y productiva. Ahora es momento de conocer las herramientas avanzadas que te dan más control sobre la historia, la sincronización y la colaboración.
 
-Piensa en GitHub CLI como un control remoto para GitHub: en vez de ir al navegador para crear un PR, lo haces directo desde la terminal. Y los agentes de IA son como un compañero experto sentado a tu lado, que puedes consultar en cualquier momento.
-
----
-
-### ¿Qué es GitHub CLI?
-
-GitHub CLI (`gh`) es la herramienta oficial de GitHub para interactuar con la plataforma desde la terminal. Te permite hacer casi todo lo que harías en el navegador, pero sin salir de la línea de comandos.
-
-**¿Por qué es útil?**
-- No necesitas cambiar entre terminal y navegador constantemente
-- Es más rápido para tareas repetitivas
-- Se integra perfectamente con tu flujo de Git
-- Los agentes de IA pueden usarla directamente
+Estos comandos son más poderosos, pero también requieren más cuidado. Úsalos cuando entiendas bien lo que hacen.
 
 ---
 
-### Instalación de GitHub CLI
+### `git reset --hard HEAD~1` — El botón nuclear
 
-<Callout type="tip" title="WSL / Ubuntu 24.04 / Linux">
-  En Ubuntu 24.04 y versiones recientes, `gh` suele estar disponible directamente:
-
-  ```bash
-  sudo apt update
-  sudo apt install gh
-  ```
-
-  Si el paquete no se encuentra, necesitas agregar el repositorio oficial de GitHub CLI primero. Revisa las instrucciones en el Módulo 6 o en [cli.github.com](https://cli.github.com/).
+<Callout type="warning" title="PELIGRO: Este comando DESTRUYE cambios">
+  `git reset --hard` elimina el commit **Y todos los cambios en los archivos**. No hay vuelta atrás. Úsalo solo si estás 100% seguro de que quieres borrar todo.
 </Callout>
 
-<Callout type="tip" title="macOS">
-  ```bash
-  brew install gh
-  ```
+```bash
+# Esto BORRA el último commit y todos sus cambios
+git reset --hard HEAD~1
+# HEAD is now at b2c3d4e Agrega lista de ingredientes
+```
+
+Después de ejecutar esto, es como si el último commit nunca hubiera existido. Los archivos vuelven al estado del commit anterior y los cambios se pierden para siempre.
+
+**¿Cuándo usarlo?** Casi nunca. Solo cuando hiciste algo realmente mal y estás seguro de que quieres eliminarlo por completo. En la mayoría de los casos, `git revert` (Módulo 5) es mejor opción.
+
+| Comando | ¿Es seguro? | ¿Cuándo usarlo? |
+|---------|-------------|-----------------|
+| `git revert` | Sí, es la opción recomendada | Para deshacer un cambio manteniendo la historia |
+| `git reset --soft` | Sí, los archivos no se pierden | Para corregir un mensaje de commit o agregar archivos olvidados |
+| `git reset --hard` | **NO, destruye cambios** | Solo cuando estás 100% seguro de querer borrar todo |
+
+---
+
+### `git rebase` — Otra forma de integrar cambios
+
+Merge no es la única forma de integrar cambios entre ramas. Existe otra herramienta llamada **rebase** que logra lo mismo, pero de una forma diferente.
+
+La diferencia clave es **cómo queda la historia**:
+
+- **Merge** crea un "nudo" en la historia: un commit especial de merge que une las dos ramas
+- **Rebase** "reescribe" la historia para que sea **lineal**, como si hubieras hecho tus cambios después de todo lo que pasó en main
+
+```
+Merge: crea un commit de merge (M) que une las ramas
+        main:    A --- B --- C --------- M
+                              \         /
+        feature:               D --- E
+
+Rebase: mueve tus commits para que empiecen desde la punta de main
+        main:    A --- B --- C --- D' --- E'
+```
+
+Con merge, la historia muestra "aquí se juntaron dos ramas". Con rebase, la historia queda limpia y lineal: tus commits aparecen como una continuación directa de `main`.
+
+**El comando básico:**
+
+```bash
+# Estando en tu rama feature
+git rebase main
+```
+
+Esto "mueve" los commits de tu rama para que empiecen desde la punta de `main`. Tus commits D y E se convierten en D' y E' (copias con el mismo contenido pero en una nueva posición de la historia).
+
+<Callout type="warning" title="Regla de oro del rebase">
+  **Nunca hagas rebase de commits que ya compartiste** (que ya subiste con `git push`). Rebase reescribe la historia, y si alguien más ya tiene esos commits, van a tener problemas para sincronizar su trabajo. Si ya hiciste push, usa merge.
 </Callout>
 
-Verifica que se instaló:
-
-```bash
-gh --version
-# gh version 2.x.x (la versión que sea)
-```
-
----
-
-### Autenticación
-
-Lo primero es conectar `gh` con tu cuenta de GitHub:
-
-```bash
-gh auth login
-```
-
-Te hará algunas preguntas:
-
-```bash
-# ? What account do you want to log into?
-#   > GitHub.com
-# ? What is your preferred protocol for Git operations on this host?
-#   > HTTPS
-# ? Authenticate Git with your GitHub credentials?
-#   > Yes
-# ? How would you like to authenticate GitHub CLI?
-#   > Login with a web browser
-```
-
-Se abrirá tu navegador para autorizar. Sigue las instrucciones y listo. Una vez autenticado, no necesitas tokens ni contraseñas para nada más.
-
-<Callout type="info" title="Una vez y listo">
-  `gh auth login` también configura las credenciales de Git, así que no necesitas configurar tokens por separado. Es la forma más fácil de autenticarte para todo.
-</Callout>
-
-Para verificar que estás autenticado:
-
-```bash
-gh auth status
-# github.com
-#   ✓ Logged in to github.com account tu-usuario
-```
-
----
-
-### Crear repositorios desde la terminal
-
-En vez de ir al navegador:
-
-```bash
-# Crear un repo público desde la carpeta actual
-gh repo create mi-proyecto --public --source=. --push
-
-# ¿Qué hace cada flag?
-# --public: el repo será público (usa --private para privado)
-# --source=.: usa la carpeta actual como código fuente
-# --push: sube el código automáticamente
-```
-
-Esto hace en un solo comando lo que antes requería: ir a GitHub → crear repo → copiar URL → `git remote add` → `git push`. Todo junto.
-
-```bash
-# Crear un repo y clonarlo (proyecto nuevo desde cero)
-gh repo create mi-nuevo-proyecto --public --clone
-cd mi-nuevo-proyecto
-```
-
----
-
-### Pull Requests desde la terminal
-
-Recuerda el Módulo 7: crear un PR requería ir al navegador. Con `gh` lo haces directo:
-
-```bash
-# Crear un Pull Request
-gh pr create --title "Agrega nueva funcionalidad" --body "Descripción de los cambios"
-
-# Si no pasas título ni body, se abre un editor interactivo:
-gh pr create
-```
-
-Ver tus Pull Requests:
-
-```bash
-# Listar PRs abiertos
-gh pr list
-
-# Ver detalles de un PR específico
-gh pr view 1
-# (donde 1 es el número del PR)
-
-# Ver el PR del branch actual
-gh pr view
-```
-
-Revisar y mergear PRs:
-
-```bash
-# Ver los cambios de un PR (como el diff)
-gh pr diff 1
-
-# Mergear un PR desde la terminal
-gh pr merge 1 --merge
-# --merge: merge commit (como el botón verde de GitHub)
-# --squash: combina commits en uno
-# --rebase: rebase merge
-```
-
-<Callout type="tip" title="Flujo profesional acelerado">
-  Con `gh`, el flujo del Módulo 7 se reduce a:
-
-  ```bash
-  git switch -c feature/mi-cambio
-  # ... hacer cambios, commits ...
-  git push -u origin feature/mi-cambio
-  gh pr create --title "Mi cambio" --body "Descripción"
-  # ... esperar revisión ...
-  gh pr merge --merge
-  git switch main && git pull
-  ```
-
-  Todo sin salir de la terminal.
+<Callout type="tip" title="¿Merge o rebase?">
+  Ambos logran lo mismo: integrar cambios de una rama a otra. **Merge** preserva la historia tal cual fue (con sus bifurcaciones y uniones). **Rebase** la simplifica (todo queda lineal). Para principiantes, merge es más seguro porque no reescribe la historia. Cuando te sientas cómodo con Git, prueba rebase — muchos equipos lo prefieren por mantener un historial más limpio.
 </Callout>
 
 ---
 
-### Gestión de issues
+### Mantener tu rama actualizada con rebase (en Pull Requests)
 
-Los **issues** son como tickets de trabajo en GitHub. Con `gh` puedes gestionarlos directamente:
+Mientras trabajas en tu rama, tus compañeros siguen mergeando cambios a `main`. Después de unos días, tu rama está **desactualizada**: le faltan cambios que ya están en `main`. Esto puede causar conflictos más difíciles cuando quieras hacer merge, y hace que tu PR sea más difícil de revisar.
 
-```bash
-# Listar issues abiertos
-gh issue list
-
-# Crear un issue
-gh issue create --title "Bug: el botón no funciona" --body "Al hacer clic no pasa nada"
-
-# Ver un issue
-gh issue view 5
-
-# Cerrar un issue
-gh issue close 5
-```
-
----
-
-### Ver el estado de tu repositorio
+La solución es **actualizar tu rama con rebase** antes de crear el PR (o durante la revisión):
 
 ```bash
-# Resumen general del repo (PRs, issues, etc.)
-gh repo view
+# Estás en tu rama feature/mi-cambio
 
-# Ver en el navegador (abre GitHub automáticamente)
-gh repo view --web
-
-# Ver el estado de los checks/CI de tu PR
-gh pr checks
-```
-
----
-
-### Tabla resumen de GitHub CLI
-
-<CommandTable commands={[
-  { command: "gh auth login", description: "Autenticarte con GitHub" },
-  { command: "gh repo create nombre --public --source=. --push", description: "Crear repo y subir código" },
-  { command: "gh pr create --title \"...\" --body \"...\"", description: "Crear un Pull Request" },
-  { command: "gh pr list", description: "Listar Pull Requests abiertos" },
-  { command: "gh pr view", description: "Ver detalles del PR actual" },
-  { command: "gh pr merge --merge", description: "Mergear un PR" },
-  { command: "gh issue list", description: "Listar issues abiertos" },
-  { command: "gh issue create --title \"...\"", description: "Crear un issue" },
-  { command: "gh repo view --web", description: "Abrir el repo en el navegador" },
-]} />
-
----
-
-### Agentes de IA en la terminal
-
-Ahora viene la parte más poderosa: los **agentes de IA** que funcionan directamente en tu terminal. Estos asistentes entienden tu código, pueden ejecutar comandos, crear archivos y ayudarte con Git y GitHub.
-
-Piensa en ellos como un programador senior sentado a tu lado, disponible 24/7, al que le puedes preguntar cualquier cosa.
-
----
-
-### Claude Code
-
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code) es un agente de IA de Anthropic que vive en tu terminal. Puede leer tu código, ejecutar comandos, crear archivos, hacer commits y hasta crear Pull Requests.
-
-**Instalación:**
-
-```bash
-npm install -g @anthropic-ai/claude-code
-```
-
-**Uso básico:**
-
-```bash
-# Iniciar Claude Code en tu proyecto
-cd mi-proyecto
-claude
-```
-
-Se abre una sesión interactiva donde puedes pedirle cosas como:
-
-```
-> Revisa mi código y dime si hay errores
-> Crea un .gitignore apropiado para un proyecto Node.js
-> Haz commit de todos los cambios con un buen mensaje
-> Crea un Pull Request con descripción detallada
-```
-
-Claude Code puede usar `git` y `gh` directamente, así que puede:
-
-- Hacer `git add`, `git commit` y `git push` por ti
-- Crear Pull Requests con `gh pr create`
-- Revisar el estado de tu repo con `git status`
-- Resolver conflictos de merge explicándote qué está pasando
-
-<Callout type="tip" title="Claude Code + Git = superpoder">
-  En vez de recordar todos los comandos de Git, puedes decirle a Claude Code en lenguaje natural lo que quieres hacer:
-
-  - "Guarda mis cambios con un mensaje descriptivo" → hace `git add` + `git commit`
-  - "Sube mi rama y crea un PR" → hace `git push` + `gh pr create`
-  - "¿Qué cambié desde el último commit?" → ejecuta `git diff`
-  - "Vuelve al estado anterior" → ejecuta `git revert` o `git reset` según corresponda
-</Callout>
-
----
-
-### Gemini CLI
-
-[Gemini CLI](https://github.com/google-gemini/gemini-cli) es el agente de IA de Google que también funciona en la terminal. Es open source y gratuito con tu cuenta de Google.
-
-**Instalación:**
-
-```bash
-npm install -g @google/gemini-cli
-```
-
-**Uso básico:**
-
-```bash
-cd mi-proyecto
-gemini
-```
-
-Al igual que Claude Code, puedes pedirle que interactúe con Git:
-
-```
-> Inicializa este proyecto con Git y haz el primer commit
-> Muéstrame el historial de cambios
-> Crea una rama para trabajar en el login
-```
-
----
-
-### GitHub Copilot CLI
-
-Si tienes suscripción a [GitHub Copilot](https://github.com/features/copilot), también puedes usarlo desde la terminal con la extensión de `gh`:
-
-```bash
-# Instalar la extensión
-gh extension install github/gh-copilot
-
-# Pedir ayuda con comandos
-gh copilot suggest "cómo deshacer el último commit sin perder cambios"
-# Sugerencia: git reset --soft HEAD~1
-
-gh copilot explain "git rebase -i HEAD~3"
-# Te explica qué hace ese comando en detalle
-```
-
-<Callout type="info" title="¿Cuál agente elegir?">
-  - **Claude Code**: Muy capaz para tareas complejas, entiende contexto del proyecto completo. Requiere API key de Anthropic.
-  - **Gemini CLI**: Gratuito con cuenta de Google, open source, bueno para tareas generales.
-  - **GitHub Copilot CLI**: Integrado con `gh`, perfecto para sugerencias de comandos Git. Requiere suscripción Copilot.
-
-  Puedes probar los tres y quedarte con el que más te guste. Todos funcionan bien con Git y GitHub.
-</Callout>
-
----
-
-### Ejemplo práctico: flujo completo con gh y agente de IA
-
-Así se ve un flujo de trabajo real combinando `gh` y un agente de IA:
-
-```bash
-# 1. Crear un proyecto nuevo (con gh)
-mkdir mi-app && cd mi-app
-git init
-echo "# Mi App" > README.md
-git add . && git commit -m "Commit inicial"
-gh repo create mi-app --public --source=. --push
-
-# 2. Iniciar tu agente de IA
-claude  # o gemini, según tu preferencia
-
-# 3. Pedirle al agente que trabaje
-> Crea una estructura básica para una app web con HTML, CSS y JS
-> Haz commit de los cambios
-> Crea una rama feature/estilos y mejora el CSS
-> Sube la rama y crea un PR
-
-# 4. Revisar y mergear
-gh pr view
-gh pr merge --merge
-
-# 5. Actualizar local
+# 1. Traer los cambios más recientes de main
 git switch main
 git pull
+
+# 2. Volver a tu rama y hacer rebase
+git switch feature/mi-cambio
+git rebase main
+
+# 3. Si hay conflictos, resolverlos y continuar
+# (editar archivo, resolver conflicto)
+git add archivo-resuelto.txt
+git rebase --continue
+
+# 4. Si todo sale mal, puedes cancelar y volver al estado anterior
+git rebase --abort
 ```
 
-Lo que antes tomaba 15-20 comandos manuales, ahora es una conversación natural con tu agente de IA.
+**¿Por qué rebase y no merge?** Si haces `git merge main` dentro de tu rama, funciona, pero cuando las historias han divergido crea commits de merge extras que ensucian la historia y hacen tu PR más difícil de revisar. Con rebase, tu rama queda como si la hubieras creado recién desde el `main` más actualizado: limpia y fácil de revisar.
+
+---
+
+### `git pull --rebase` — Atajo para actualizar tu rama
+
+El flujo anterior (switch main → pull → switch feature → rebase) tiene un atajo. Si estás en tu rama y quieres actualizar directamente:
+
+```bash
+# Estando en tu rama feature/mi-cambio
+git pull --rebase origin main
+```
+
+Esto hace `git fetch` + `git rebase` en un solo comando: trae los cambios de `main` del remoto y reaplica tus commits encima.
+
+Por defecto, `git pull` sin flags hace un merge: trae los cambios remotos y crea un commit de merge para combinarlos (si las historias divergieron). La diferencia es la misma que ya conoces — `--rebase` mantiene la historia lineal, el merge por defecto preserva las bifurcaciones.
+
+---
+
+### `git push --force-with-lease` — Push seguro después de rebase
+
+<Callout type="warning" title="Si ya habías hecho push antes del rebase">
+  Rebase reescribe la historia de tu rama. Si ya habías subido la rama con `git push`, después del rebase necesitas forzar la subida:
+
+  ```bash
+  git push --force-with-lease
+  ```
+
+  Usamos `--force-with-lease` en vez de `--force` porque es más seguro: verifica que nadie más haya subido commits a tu rama antes de sobrescribirla. Si alguien más subió cambios, el push falla en vez de borrar su trabajo.
+</Callout>
+
+---
+
+### Fork — Tu propia copia de un proyecto ajeno
+
+Un **fork** es una copia completa de un repositorio de otra persona en **tu cuenta** de GitHub. Es diferente a clonar:
+
+- **Clone**: descarga un repo a tu computador (copia local)
+- **Fork**: crea una copia del repo en tu cuenta de GitHub (copia en la nube)
+
+¿Para qué sirve? Imagina que encuentras un proyecto open source que quieres mejorar. No puedes hacer push directamente al repo de otra persona (no tienes permisos), pero puedes:
+
+1. **Hacer fork** del proyecto (ahora tienes tu propia copia en GitHub)
+2. **Clonar tu fork** a tu computador
+3. Hacer tus cambios y push a **tu fork**
+4. Crear un Pull Request desde tu fork al proyecto original
+
+**Cómo hacer un fork:**
+
+1. Ve al repositorio en GitHub que quieres copiar
+2. Haz clic en el botón **"Fork"** (esquina superior derecha)
+3. Selecciona tu cuenta como destino
+4. ¡Listo! Ahora tienes una copia en `github.com/tu-usuario/nombre-repo`
+
+**Trabajar con tu fork:**
+
+```bash
+# 1. Clonar TU fork (no el repo original)
+git clone https://github.com/tu-usuario/nombre-repo.git
+cd nombre-repo
+
+# Verificar: origin apunta a TU fork
+git remote -v
+# origin  https://github.com/tu-usuario/nombre-repo.git (fetch)
+# origin  https://github.com/tu-usuario/nombre-repo.git (push)
+
+# 2. Crear una rama para tu contribución (nunca trabajes en main)
+git switch -c feature/mi-mejora
+
+# 3. Hacer tus cambios, add y commit
+echo "Mi mejora" >> archivo.txt
+git add archivo.txt
+git commit -m "Agrega mejora al archivo"
+
+# 4. Subir la rama a TU fork
+git push -u origin feature/mi-mejora
+```
+
+Después ve a GitHub y crea un **Pull Request** desde tu fork al repositorio original. GitHub detecta automáticamente la rama que subiste y te ofrece crear el PR.
+
+<Callout type="tip" title="Fork vs Clone: ¿cuándo usar cada uno?">
+  - **Clone**: cuando quieres descargar un repo para verlo o usarlo localmente
+  - **Fork**: cuando quieres hacer cambios y eventualmente proponerlos al proyecto original, o cuando quieres tu propia versión independiente de un proyecto
+</Callout>
+
+---
+
+### Mantener tu fork actualizado con `upstream`
+
+Con el tiempo, el proyecto original seguirá avanzando. Para traer esos cambios a tu fork:
+
+```bash
+# Agregar una conexión al repo original (se hace una sola vez)
+git remote add upstream https://github.com/autor-original/nombre-repo.git
+
+# Traer los cambios del original y actualizar tu fork
+git fetch upstream
+git switch main
+git merge upstream/main
+git push
+# Ahora tu fork está al día con el proyecto original
+```
+
+`upstream` es el nombre convencional para el repositorio original (el que forkeaste). `origin` sigue siendo tu fork.
+
+---
+
+### `git fetch` — Preguntar si hay novedades
+
+`git fetch` revisa si hay cambios nuevos en GitHub **sin aplicarlos** a tus archivos. Es como mirar el buzón sin abrir las cartas.
+
+```bash
+git fetch
+# Si hay cambios nuevos, te muestra información
+# Si no hay cambios, no muestra nada
+```
+
+Es útil para verificar si alguien más subió cambios antes de traerlos. La diferencia con `git pull`:
+
+- `git fetch`: solo descarga la información, tus archivos no cambian
+- `git pull`: descarga Y aplica los cambios (es un `fetch` + `merge`)
+
+---
+
+### `git pull` avanzado
+
+Ya conoces `git pull` del Módulo 4. Aquí van los detalles más avanzados.
+
+**El comportamiento por defecto de `git pull` es hacer merge.** Cuando ejecutas `git pull` sin flags, Git hace dos cosas automáticamente:
+
+1. `git fetch` — descarga los cambios del remoto
+2. `git merge` — fusiona esos cambios con tu rama local
+
+Como el merge ya viene "de fábrica", **no existe un flag `--merge`**. Si intentas `git pull --merge`, Git te dará un error. Es lógico pensar que debería existir (sobre todo porque sí existe `--rebase`), pero sería redundante.
+
+**Los flags que sí existen:**
+
+```bash
+# Pull normal (fetch + merge) — comportamiento por defecto
+git pull
+
+# Pull con rebase (fetch + rebase, historia lineal)
+git pull --rebase origin main
+
+# Forzar commit de merge explícito (incluso si no hay conflictos)
+git pull --no-ff
+
+# Forzar merge aunque tu config global diga rebase
+git pull --no-rebase
+
+# Solo funciona si no hay divergencia (el más seguro)
+git pull --ff-only
+```
+
+<Callout type="tip" title="¿Cuál usar?">
+  - `git pull` (sin flags): suficiente para el 90% de los casos
+  - `git pull --rebase`: cuando quieres mantener la historia lineal
+  - `git pull --no-rebase`: cuando configuraste rebase por defecto pero para un caso puntual quieres merge
+  - `git pull --ff-only`: el más seguro — si tu historial local divergió del remoto, **falla** en vez de intentar fusionar. Así evitas commits de merge accidentales y decides tú cómo resolver la situación
+  - `git pull --no-ff`: cuando quieres dejar registro explícito de que se integraron cambios externos, aunque no haya conflictos
+</Callout>
+
+<Callout type="warning" title="Siempre haz commit antes de pull">
+  Antes de hacer `git pull`, asegúrate de haber hecho commit de todos tus cambios locales. Si tienes cambios sin guardar y los cambios remotos tocan los mismos archivos, podrías tener conflictos difíciles de resolver.
+
+  ```bash
+  # Antes de pull, siempre:
+  git status
+  # Si hay cambios pendientes:
+  git add .
+  git commit -m "Guarda cambios antes de pull"
+  # Ahora sí:
+  git pull
+  ```
+</Callout>
+
+---
+
+### Tabla resumen
+
+<CommandTable commands={[
+  { command: "git reset --hard HEAD~1", description: "⚠️ BORRAR último commit y todos sus cambios" },
+  { command: "git rebase main", description: "Reescribir tu rama para que empiece desde la punta de main" },
+  { command: "git rebase --continue", description: "Continuar rebase después de resolver conflicto" },
+  { command: "git rebase --abort", description: "Cancelar rebase y volver al estado anterior" },
+  { command: "git pull --rebase origin main", description: "Actualizar tu rama con rebase en un solo comando" },
+  { command: "git push --force-with-lease", description: "Push seguro después de rebase (verifica que nadie más subió)" },
+  { command: "Fork (botón en GitHub)", description: "Crear tu propia copia de un repo ajeno" },
+  { command: "git remote add upstream <URL>", description: "Conectar con el repo original (después de fork)" },
+  { command: "git fetch", description: "Revisar si hay cambios nuevos (sin aplicar)" },
+  { command: "git fetch upstream", description: "Traer cambios del repo original (fork)" },
+  { command: "git pull", description: "Descargar y aplicar cambios de GitHub (merge por defecto)" },
+  { command: "git pull --ff-only", description: "Pull seguro: falla si el historial divergió" },
+  { command: "git pull --no-rebase", description: "Forzar merge aunque tu config diga rebase" },
+]} />
 
 ---
 
 ### Ejercicios del módulo
 
-**Ejercicio 1:** Instala GitHub CLI y autentícate:
+**Ejercicio 1:** Practica `git reset --hard` en un repo desechable:
 
 ```bash
-# Instalar (elige tu sistema operativo)
-sudo apt update && sudo apt install gh   # WSL/Linux
-brew install gh                          # macOS
-
-# Autenticarte
-gh auth login
-gh auth status
-```
-
-**Ejercicio 2:** Crea un repositorio desde la terminal usando `gh`:
-
-```bash
-mkdir prueba-gh && cd prueba-gh
+mkdir practica-avanzado && cd practica-avanzado
 git init
-echo "# Creado con gh" > README.md
-git add . && git commit -m "Commit inicial"
-gh repo create prueba-gh --public --source=. --push
+echo "Línea 1" > archivo.txt
+git add . && git commit -m "Commit 1"
+echo "Línea 2" >> archivo.txt
+git add . && git commit -m "Commit 2"
+echo "Línea 3" >> archivo.txt
+git add . && git commit -m "Commit 3"
+
+# Ver historial
+git log --oneline
+# Ahora borra el último commit
+git reset --hard HEAD~1
+git log --oneline
+cat archivo.txt
+# La línea 3 desapareció por completo
 ```
 
-Ve a GitHub en tu navegador y verifica que el repo existe.
-
-**Ejercicio 3:** Crea un PR completo desde la terminal:
+**Ejercicio 2:** Practica rebase entre ramas:
 
 ```bash
-git switch -c feature/prueba-cli
-echo "Archivo creado desde la CLI" > prueba.txt
-git add . && git commit -m "Agrega archivo de prueba"
-git push -u origin feature/prueba-cli
-gh pr create --title "Prueba de GitHub CLI" --body "PR creado sin salir de la terminal"
-gh pr view
-```
+# Crear commits en main
+echo "Base actualizada" >> archivo.txt
+git add . && git commit -m "Actualiza base en main"
 
-**Ejercicio 4:** Mergea el PR y limpia:
+# Crear rama y trabajar
+git switch -c feature/prueba-rebase
+echo "Cambio en rama" > rama.txt
+git add . && git commit -m "Agrega archivo en rama"
 
-```bash
-gh pr merge --merge
+# Volver a main y agregar otro commit
 git switch main
-git pull
-git branch -d feature/prueba-cli
+echo "Otro cambio en main" >> archivo.txt
+git add . && git commit -m "Otro cambio en main"
+
+# Rebase: actualizar la rama
+git switch feature/prueba-rebase
+git rebase main
+git log --oneline
+# Tu commit de rama aparece DESPUÉS de los de main
+
+# Limpieza
+git switch main
+git merge feature/prueba-rebase
+git branch -d feature/prueba-rebase
 ```
 
-**Ejercicio 5 (Exploración):** Si te interesa, instala uno de los agentes de IA y pruébalo en un proyecto de Git:
+**Ejercicio 3:** Haz fork de un repositorio público: ve a cualquier repo en GitHub, haz clic en "Fork", clona **tu fork** y verifica con `git remote -v` que apunta a tu cuenta.
+
+**Ejercicio 4:** Practica `git fetch` para ver cambios sin aplicarlos:
 
 ```bash
-# Opción A: Claude Code
-npm install -g @anthropic-ai/claude-code
-cd tu-proyecto
-claude
-
-# Opción B: Gemini CLI
-npm install -g @google/gemini-cli
-cd tu-proyecto
-gemini
+# En un repo conectado a GitHub
+git fetch
+git log --oneline origin/main
+# Ves los commits remotos sin que tus archivos cambien
+git pull
+# Ahora sí se aplican
 ```
 
-Prueba pedirle: "Muéstrame el estado de Git de este proyecto" o "Haz commit de mis cambios con un buen mensaje".
-
-<Callout type="info" title="La terminal es tu centro de comando">
-  Con `gh` y un agente de IA, tu terminal se convierte en el centro de toda tu productividad. No necesitas cambiar entre ventanas, recordar comandos exactos ni buscar en documentación. Solo describe lo que quieres hacer y deja que las herramientas trabajen por ti.
-
-  Eso sí, **primero aprende los fundamentos** (los módulos 1 al 7 de este curso). Entender qué hace cada comando es esencial para poder verificar que las herramientas están haciendo lo correcto.
+<Callout type="tip" title="Estas herramientas son poderosas pero opcionales">
+  Todo lo que aprendiste en los módulos 1-7 es suficiente para trabajar profesionalmente con Git. Las técnicas de este módulo te dan más control, pero solo úsalas cuando las necesites. No compliques tu flujo si merge y pull básico te funcionan bien.
 </Callout>

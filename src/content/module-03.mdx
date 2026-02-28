@@ -141,16 +141,23 @@ Si ya hiciste `git add` y quieres ver qué está en el staging:
 git diff --staged
 ```
 
+<Callout type="info" title="¿Por qué git diff muestra cambios si ya hicimos git add?">
+  Porque modificamos el archivo **después** de hacer `git add`. El `git add` anterior preparó la versión original del archivo (solo con "# Mi primera receta"). La línea que agregamos después existe en tu carpeta de trabajo pero NO está en el staging. Para incluirla, tendrías que hacer `git add receta.txt` de nuevo. Esto es importante: **git add captura el estado del archivo en ese momento**, no los cambios futuros.
+</Callout>
+
 ---
 
 ### `git commit -m "mensaje"` — Tomar la foto
 
 `git commit` toma la "foto" de todo lo que está en el staging y la guarda permanentemente en el historial. El `-m` te permite escribir un mensaje que describe qué hiciste.
 
+Antes de hacer el commit, agreguemos la línea nueva al staging:
+
 ```bash
+git add receta.txt
 git commit -m "Agrega receta inicial de pasta"
 # [main (root-commit) a1b2c3d] Agrega receta inicial de pasta
-#  1 file changed, 1 insertion(+)
+#  1 file changed, 2 insertions(+)
 #  create mode 100644 receta.txt
 ```
 
@@ -299,7 +306,7 @@ git log --oneline
 ¡Acabas de crear un proyecto con dos commits! Tienes dos "fotos" guardadas de tu proyecto. Podrías volver a cualquiera de ellas en cualquier momento (lo veremos en el módulo siguiente).
 
 <Callout type="info" title="¿Y cómo comparto esto con el mundo?">
-  Todo lo que acabas de hacer vive **solo en tu computador**. Si tu disco duro muere mañana, pierdes todo. En el **Módulo 6** aprenderás a subir tu proyecto a GitHub para tener un respaldo en la nube y poder compartirlo con otras personas.
+  Todo lo que acabas de hacer vive **solo en tu computador**. Si tu disco duro muere mañana, pierdes todo. En el **Módulo 4** aprenderás a subir tu proyecto a GitHub para tener un respaldo en la nube y poder compartirlo con otras personas.
 </Callout>
 
 ---

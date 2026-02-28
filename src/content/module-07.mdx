@@ -31,7 +31,7 @@ Antes de ver el flujo completo, es importante entender que existen **dos caminos
 | **¿Dónde haces push?** | Directamente al repo original | A tu fork |
 | **¿Cómo llegan tus cambios?** | PR dentro del mismo repo | PR desde tu fork al repo original |
 
-En este módulo veremos primero el **camino de equipo** paso a paso. Al final verás el **camino de contribuidor externo**, que es casi idéntico: la única diferencia es que primero haces fork (como aprendiste en el Módulo 6) y el PR va desde tu fork al repo original.
+En este módulo veremos primero el **camino de equipo** paso a paso. Al final verás el **camino de contribuidor externo**, que es casi idéntico: la única diferencia es que primero haces fork (como aprenderás en el Módulo 8) y el PR va desde tu fork al repo original.
 
 ---
 
@@ -53,7 +53,7 @@ Veamos cada paso en detalle.
 
 ### Paso 1-2: Crear rama y trabajar
 
-Esto ya lo sabes del Módulo 5:
+Esto ya lo sabes del Módulo 6:
 
 ```bash
 # Crear rama para tu tarea
@@ -173,59 +173,6 @@ git branch -d feature/mi-cambio
 
 ---
 
-### Mantener tu rama actualizada con rebase
-
-Mientras trabajas en tu rama, tus compañeros siguen mergeando cambios a `main`. Después de unos días, tu rama está **desactualizada**: le faltan cambios que ya están en `main`. Esto puede causar conflictos más difíciles cuando quieras hacer merge, y hace que tu PR sea más difícil de revisar.
-
-La solución es **actualizar tu rama con rebase** antes de crear el PR (o durante la revisión):
-
-```bash
-# Estás en tu rama feature/mi-cambio
-
-# 1. Traer los cambios más recientes de main
-git switch main
-git pull
-
-# 2. Volver a tu rama y hacer rebase
-git switch feature/mi-cambio
-git rebase main
-
-# 3. Si hay conflictos, resolverlos y continuar
-# (editar archivo, resolver conflicto)
-git add archivo-resuelto.txt
-git rebase --continue
-
-# 4. Si todo sale mal, puedes cancelar y volver al estado anterior
-git rebase --abort
-```
-
-**¿Por qué rebase y no merge?** Si haces `git merge main` dentro de tu rama, funciona, pero crea commits de merge extras que ensucian la historia y hacen tu PR más difícil de revisar. Con rebase, tu rama queda como si la hubieras creado recién desde el `main` más actualizado: limpia y fácil de revisar.
-
-**Atajo: `git pull --rebase`**
-
-El flujo anterior (switch main → pull → switch feature → rebase) tiene un atajo. Si estás en tu rama y quieres actualizar directamente:
-
-```bash
-# Estando en tu rama feature/mi-cambio
-git pull --rebase origin main
-```
-
-Esto hace `git fetch` + `git rebase` en un solo comando: trae los cambios de `main` del remoto y reaplica tus commits encima.
-
-También existe `git pull --merge` (que es lo que `git pull` hace por defecto): trae los cambios remotos y crea un commit de merge para combinarlos. La diferencia es la misma que ya conoces — `--rebase` mantiene la historia lineal, `--merge` preserva las bifurcaciones.
-
-<Callout type="warning" title="Si ya habías hecho push antes del rebase">
-  Rebase reescribe la historia de tu rama. Si ya habías subido la rama con `git push`, después del rebase necesitas forzar la subida:
-
-  ```bash
-  git push --force-with-lease
-  ```
-
-  Usamos `--force-with-lease` en vez de `--force` porque es más seguro: verifica que nadie más haya subido commits a tu rama antes de sobrescribirla. Si alguien más subió cambios, el push falla en vez de borrar su trabajo.
-</Callout>
-
----
-
 ### Flujo completo de ejemplo
 
 Veamos todo el flujo de principio a fin, como lo harías en tu día a día:
@@ -329,7 +276,6 @@ git push -u origin fix/corregir-typo
   { command: "git push", description: "Subir nuevos commits (después del -u)" },
   { command: "git switch main", description: "Volver a la rama principal" },
   { command: "git pull", description: "Actualizar main con los cambios de GitHub" },
-  { command: "git pull --rebase origin main", description: "Actualizar tu rama con rebase en un solo comando" },
   { command: "git branch -d feature/nombre", description: "Borrar rama local después del merge" },
 ]} />
 

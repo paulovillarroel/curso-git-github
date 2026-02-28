@@ -79,7 +79,7 @@ Existen otros servicios similares a GitHub: **GitLab**, **Bitbucket**, **Codeber
 
 **Git NO sube nada a internet automáticamente.** Todo lo que haces con Git es **local** hasta que tú decides subirlo. Puedes trabajar semanas sin conexión y subir todo después. Tú controlas cuándo y qué compartes.
 
-**Git NO guarda copias completas de cada versión.** Es más inteligente que eso: internamente guarda solo las **diferencias** entre versiones (los "deltas"), lo que lo hace increíblemente eficiente. Un proyecto con miles de versiones puede ocupar menos espacio que unas pocas copias manuales de archivos zip.
+**Git NO guarda copias completas de cada versión repetida.** Es más inteligente que eso: internamente guarda **snapshots** (fotos) de tus archivos, pero si un archivo no cambió entre versiones, reutiliza el que ya tiene en vez de duplicarlo. Esto lo hace increíblemente eficiente. Un proyecto con miles de versiones puede ocupar menos espacio que unas pocas copias manuales de archivos zip.
 
 ---
 
@@ -137,7 +137,7 @@ git config --global user.email "tu@correo.com"
 ```
 
 <Callout type="warning" title="Usa el mismo correo que en GitHub">
-  Cuando crees tu cuenta de GitHub (en el Módulo 6), usa el **mismo correo** que pusiste aquí. Así GitHub reconocerá tus contribuciones automáticamente.
+  Cuando crees tu cuenta de GitHub (en el Módulo 4), usa el **mismo correo** que pusiste aquí. Así GitHub reconocerá tus contribuciones automáticamente.
 </Callout>
 
 ¿Qué significa `--global`? Que esta configuración aplica para **todos** tus proyectos en este computador. Solo necesitas hacerlo una vez.
@@ -170,7 +170,7 @@ Por convención moderna, la rama principal se llama `main`. Configuremos eso:
 git config --global init.defaultBranch main
 ```
 
-No te preocupes si no entiendes qué son las "ramas" todavía. Lo veremos en el Módulo 5. Por ahora solo estamos dejando todo bien configurado.
+No te preocupes si no entiendes qué son las "ramas" todavía. Lo veremos en el Módulo 6. Por ahora solo estamos dejando todo bien configurado.
 
 ---
 
