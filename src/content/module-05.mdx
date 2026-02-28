@@ -178,11 +178,11 @@ git stash pop
 mkdir practica-tiempo && cd practica-tiempo
 git init
 echo "Línea 1: Hola" > archivo.txt
-git add . && git commit -m "Agrega línea 1"
+git add . && git commit -m "feat: agrega línea 1"
 echo "Línea 2: Mundo" >> archivo.txt
-git add . && git commit -m "Agrega línea 2"
+git add . && git commit -m "feat: agrega línea 2"
 echo "Línea 3: Git es genial" >> archivo.txt
-git add . && git commit -m "Agrega línea 3"
+git add . && git commit -m "feat: agrega línea 3"
 ```
 
 **Ejercicio 2:** Usa `git log --oneline` para ver el historial. Deberías ver 3 commits con sus hashes.
@@ -195,7 +195,7 @@ git add . && git commit -m "Agrega línea 3"
 
 ```bash
 echo "Línea extra de prueba" >> archivo.txt
-git add . && git commit -m "Agrega línea extra"
+git add . && git commit -m "feat: agrega línea extra"
 git reset --soft HEAD~1
 git status
 # Deberías ver los cambios en staging (verde)

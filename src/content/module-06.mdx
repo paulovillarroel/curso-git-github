@@ -66,12 +66,12 @@ Una vez en tu rama, el flujo es exactamente el mismo que aprendiste: editar → 
 # Estamos en feature/saludo
 echo "¡Hola Mundo desde Git!" > saludo.txt
 git add saludo.txt
-git commit -m "Agrega archivo de saludo"
+git commit -m "feat: agrega archivo de saludo"
 
 # Hacer otro cambio
 echo "Bienvenido al curso de Git" >> saludo.txt
 git add saludo.txt
-git commit -m "Agrega mensaje de bienvenida al saludo"
+git commit -m "feat: agrega mensaje de bienvenida al saludo"
 ```
 
 Estos commits solo existen en `feature/saludo`. La rama `main` no sabe nada de ellos.
@@ -238,7 +238,7 @@ git push origin --delete feature/saludo
 git switch -c feature/despedida
 echo "¡Adiós desde una rama!" > despedida.txt
 git add despedida.txt
-git commit -m "Agrega archivo de despedida"
+git commit -m "feat: agrega archivo de despedida"
 ```
 
 **Ejercicio 2:** Vuelve a `main` y verifica que el archivo `despedida.txt` NO está:
@@ -270,17 +270,17 @@ git branch
 ```bash
 # Crear un archivo base
 echo "Color favorito: azul" > preferencias.txt
-git add . && git commit -m "Agrega preferencias"
+git add . && git commit -m "feat: agrega preferencias"
 
 # Crear una rama y cambiar el color
 git switch -c feature/color
 echo "Color favorito: rojo" > preferencias.txt
-git add . && git commit -m "Cambia color a rojo"
+git add . && git commit -m "feat: cambia color a rojo"
 
 # Volver a main y cambiar el color diferente
 git switch main
 echo "Color favorito: verde" > preferencias.txt
-git add . && git commit -m "Cambia color a verde"
+git add . && git commit -m "feat: cambia color a verde"
 
 # Intentar merge (¡conflicto!)
 git merge feature/color
