@@ -1,0 +1,612 @@
+import Callout from '../components/Callout.astro';
+import CommandTable from '../components/CommandTable.astro';
+
+## Cómo trabajar en equipo sin destruir el proyecto
+
+Hasta ahora has aprendido Git como herramienta individual: commits, ramas, PRs, rebase. Pero cuando trabajas en equipo, la herramienta sola no basta. Necesitas **convenciones**: reglas compartidas que evitan el caos.
+
+Imagina una cocina de restaurante. Todos los chefs saben cocinar, pero si cada uno guarda los ingredientes donde quiere, usa los cuchillos de otro y no avisa cuándo enciende el horno, el resultado es un desastre. La solución no es mejor equipo de cocina — es tener **acuerdos sobre cómo trabajar juntos**.
+
+Este módulo te enseña esos acuerdos para Git: cómo nombrar ramas, escribir commits, proteger `main`, crear templates de PR, y evitar los errores más comunes en equipo.
+
+---
+
+### Convenciones de ramas
+
+Cuando trabajas solo, puedes nombrar tus ramas como quieras. En equipo, eso no funciona. Si una persona crea `arreglo-login`, otra `fix/login-bug` y otra `hotfix_auth`, nadie sabe qué está pasando.
+
+**La convención estándar:**
+
+```
+tipo/descripcion-breve
+```
+
+Los tipos más comunes:
+
+| Prefijo | Cuándo usarlo | Ejemplo |
+|---------|---------------|---------|
+| `feature/` | Nueva funcionalidad | `feature/filtro-busqueda` |
+| `fix/` | Corrección de bug | `fix/login-timeout` |
+| `hotfix/` | Arreglo urgente en producción | `hotfix/crash-pagina-inicio` |
+| `docs/` | Cambios de documentación | `docs/actualizar-readme` |
+| `refactor/` | Reestructurar código sin cambiar funcionalidad | `refactor/limpiar-utils` |
+
+```bash
+# Bien
+git switch -c feature/carrito-compras
+git switch -c fix/error-validacion-email
+git switch -c docs/guia-instalacion
+
+# Mal
+git switch -c mi-rama
+git switch -c cambios-pedro
+git switch -c arreglo-cosa
+```
+
+**La regla de oro: una tarea = una rama.** Cada rama debe hacer una cosa específica. Si tu rama hace 5 cosas diferentes, va a ser imposible de revisar y dolorosa de mergear.
+
+<Callout type="tip" title="¿Cómo sé que mi rama es demasiado grande?">
+  Si no puedes describir tu rama en una frase corta, probablemente necesitas dividirla. "Agrega filtro de búsqueda por categoría" es buena. "Mejora varias cosas del frontend" es señal de que debes dividir en varias ramas.
+</Callout>
+
+---
+
+### Convenciones de commits
+
+Los mensajes de commit son la documentación de tu proyecto. Cuando alguien (incluido tu yo del futuro) mira el historial, necesita entender qué pasó y por qué.
+
+**Conventional Commits** es el estándar más usado. La idea es simple: agregar un prefijo al mensaje que indica el tipo de cambio:
+
+```
+tipo: descripción breve del cambio
+```
+
+Los tipos más comunes:
+
+| Tipo | Significado | Ejemplo |
+|------|-------------|---------|
+| `feat:` | Nueva funcionalidad | `feat: agrega filtro por categoría` |
+| `fix:` | Corrección de bug | `fix: corrige validación de email vacío` |
+| `docs:` | Documentación | `docs: actualiza guía de instalación` |
+| `style:` | Formato, espacios, punto y coma (no cambia lógica) | `style: formatea archivo con prettier` |
+| `refactor:` | Reestructurar sin cambiar funcionalidad | `refactor: extrae función de validación` |
+| `chore:` | Mantenimiento (dependencias, config) | `chore: actualiza dependencias` |
+
+```bash
+# Bien
+git commit -m "feat: agrega botón de exportar a PDF"
+git commit -m "fix: corrige cálculo de impuestos en factura"
+git commit -m "docs: agrega sección de FAQ al README"
+
+# Mal
+git commit -m "cambios"
+git commit -m "fix bug"
+git commit -m "asdfg"
+git commit -m "WIP"
+```
+
+<Callout type="info" title="¿Y los commits WIP?">
+  Los commits "WIP" (Work In Progress) están bien mientras trabajas en tu rama. Son tu borrador. Lo importante es que **antes de crear el PR**, limpies tus commits con un squash merge o un rebase interactivo (ver [Módulo 8](#modulo-8)). Así el historial de `main` queda limpio.
+</Callout>
+
+**Reglas prácticas para buenos mensajes:**
+- Usa el imperativo: "agrega", "corrige", "elimina" (no "agregué" ni "agregando")
+- Primera línea: máximo 72 caracteres
+- Si necesitas más detalle, deja una línea en blanco y escribe un cuerpo descriptivo
+
+```bash
+git commit -m "feat: agrega autenticación con Google
+
+Implementa OAuth 2.0 para login con Google.
+Incluye botón en la página de login y manejo de
+tokens en el backend."
+```
+
+---
+
+### Branch protection en GitHub
+
+Las convenciones de ramas y commits funcionan solo si todos las respetan. Pero, ¿qué pasa si alguien hace push directo a `main` por accidente? Para eso existen las **reglas de protección de ramas**.
+
+Branch protection le dice a GitHub: "No dejes que nadie modifique `main` directamente. Todo debe pasar por un Pull Request".
+
+**Cómo configurarlo:**
+
+1. Ve a tu repositorio en GitHub
+2. **Settings** → **Branches**
+3. Haz clic en **Add branch ruleset** (o "Add rule" en repos más antiguos)
+4. En "Branch name pattern" escribe: `main`
+5. Activa estas reglas:
+
+| Regla | Qué hace |
+|-------|----------|
+| **Require a pull request before merging** | Nadie puede hacer push directo a main |
+| **Require approvals (1)** | Al menos una persona debe aprobar el PR |
+| **Do not allow bypassing the above settings** | Ni siquiera los admins pueden saltarse las reglas |
+
+```bash
+# Con branch protection activado:
+
+# Esto FALLA (push directo a main)
+git switch main
+echo "cambio directo" >> archivo.txt
+git add . && git commit -m "cambio directo"
+git push
+# ❌ remote: error: GH006: Protected branch update failed
+
+# Esto FUNCIONA (via PR)
+git switch -c fix/mi-cambio
+echo "cambio via PR" >> archivo.txt
+git add . && git commit -m "fix: cambio correcto via PR"
+git push -u origin fix/mi-cambio
+gh pr create --title "Fix: mi cambio" --body "Descripción"
+# ✅ PR creado, esperando revisión
+```
+
+<Callout type="warning" title="Branch protection es gratis para repos públicos">
+  En repos privados, necesitas GitHub Team o Enterprise para configurar branch protection con todas las opciones. En repos públicos de GitHub, todas las reglas están disponibles de forma gratuita.
+</Callout>
+
+---
+
+### PR Templates
+
+Cuando alguien crea un Pull Request, ¿cómo sabes qué debe incluir? Un **PR template** es un archivo que GitHub usa automáticamente como plantilla cada vez que alguien crea un PR.
+
+**Cómo crearlo:**
+
+```bash
+# Desde la raíz de tu proyecto
+mkdir -p .github
+```
+
+```markdown title=".github/pull_request_template.md"
+## ¿Qué hace este PR?
+
+<!-- Describe brevemente los cambios -->
+
+## Tipo de cambio
+
+- [ ] Nueva funcionalidad (feature)
+- [ ] Corrección de bug (fix)
+- [ ] Documentación (docs)
+- [ ] Refactorización (refactor)
+- [ ] Otro: ___
+
+## ¿Cómo se probó?
+
+<!-- Describe cómo verificaste que funciona -->
+
+## Checklist
+
+- [ ] Mi código sigue las convenciones del proyecto
+- [ ] He probado mis cambios localmente
+- [ ] He actualizado la documentación si es necesario
+```
+
+```bash
+# Agregar al proyecto
+git add .github/pull_request_template.md
+git commit -m "chore: agrega template de Pull Request"
+git push
+```
+
+Ahora, cada vez que alguien crea un PR en este repositorio, verá este template ya completado con las secciones. Solo tiene que rellenar los espacios.
+
+<Callout type="tip" title="Beneficio real del template">
+  El template no es burocracia — es una **checklist que evita errores**. Sin template, los PRs suelen llegar sin descripción, sin pruebas y sin contexto. Con template, el revisor puede entender rápidamente qué hace el PR y cómo verificarlo.
+</Callout>
+
+---
+
+### Squash merge
+
+Cuando trabajas en una rama, es normal hacer muchos commits pequeños: "WIP", "arregla typo", "ahora sí funciona", "ok ahora de verdad". Eso está bien para tu proceso, pero no quieres esos mensajes en el historial de `main`.
+
+**Squash merge** combina todos los commits de tu rama en un solo commit limpio al mergear:
+
+```
+main:  A --- B --- C --- D (un solo commit con todo el trabajo de la rama)
+
+En vez de:
+main:  A --- B --- WIP --- fix typo --- ahora sí --- de verdad --- merge commit
+```
+
+**Cómo hacer squash merge:**
+
+```bash
+# Desde la terminal con gh
+gh pr merge --squash
+
+# El commit resultante tendrá el título del PR como mensaje
+```
+
+**En GitHub (navegador):**
+1. En el PR, haz clic en la flecha junto al botón "Merge pull request"
+2. Selecciona "Squash and merge"
+3. Edita el mensaje del commit si quieres
+4. Confirma
+
+**Configurar squash como default en tu repositorio:**
+1. Settings → General → Pull Requests
+2. Desmarca "Allow merge commits" y "Allow rebase merge"
+3. Deja solo "Allow squash merging" marcado
+
+<Callout type="info" title="¿Squash, merge commit o rebase merge?">
+  Las tres opciones al mergear un PR hacen cosas diferentes:
+
+  | Estrategia | Qué hace | Cuándo usarla |
+  |-----------|----------|---------------|
+  | **Merge commit** | Mantiene todos los commits + agrega commit de merge | Cuando quieres preservar el historial completo |
+  | **Squash merge** | Combina todo en un solo commit | Para features con muchos commits "WIP" |
+  | **Rebase merge** | Re-aplica cada commit sobre main (sin commit de merge) | Cuando cada commit de la rama es limpio y significativo |
+
+  La mayoría de equipos usan **squash merge** como default. Mantiene `main` limpio y fácil de leer. Si quieres profundizar en rebase, revisa el [Módulo 8](#modulo-8).
+</Callout>
+
+---
+
+### Resolución de conflictos en equipo
+
+En el [Módulo 6](#modulo-6) aprendiste a resolver conflictos técnicamente. En equipo, los conflictos son también un **problema de comunicación**.
+
+**Estrategias para minimizar conflictos:**
+
+1. **Divide el trabajo por archivos/componentes.** Si Ana trabaja en el header y Bob en el footer, no habrá conflictos. Antes de empezar una tarea, revisen quién está tocando qué.
+
+2. **Haz pull frecuentemente.** No trabajes 3 días sin sincronizar. Actualiza tu rama diariamente:
+
+```bash
+# Actualizar tu rama con los últimos cambios de main
+git switch main
+git pull
+git switch mi-rama
+git merge main
+# Resuelve conflictos AHORA que son pequeños, no en 3 días cuando son enormes
+```
+
+3. **Ramas pequeñas, PRs frecuentes.** Una rama que dura 2 días tiene menos conflictos que una que dura 2 semanas.
+
+4. **Comunica antes de refactorizar.** Si vas a mover archivos, renombrar funciones o cambiar la estructura, avisa al equipo. Esos cambios generan conflictos en todas las ramas activas.
+
+**Cuando el conflicto llega (y va a llegar):**
+
+```bash
+# Paso 1: No entres en pánico
+# Paso 2: Habla con la otra persona
+# "Oye, tengo un conflicto con tu cambio en auth.js, ¿puedes explicarme qué hiciste?"
+
+# Paso 3: Resuelve juntos si es complejo
+# Paso 4: Haz commit del merge
+git add .
+git commit -m "fix: resuelve conflicto en auth.js con cambios de Ana"
+```
+
+<Callout type="warning" title="Nunca resuelvas conflictos adivinando">
+  Si no entiendes qué hace el código de la otra persona, **pregunta**. Resolver un conflicto adivinando puede introducir bugs que nadie detecta hasta producción.
+</Callout>
+
+---
+
+### Anti-patrones: lo que NO debes hacer en equipo
+
+Estos son los errores más comunes que destruyen la productividad de un equipo. Si te reconoces en alguno, no te preocupes — todos los hemos cometido.
+
+**1. Commits gigantes**
+```bash
+# MAL: un commit con 47 archivos modificados
+git add .
+git commit -m "muchos cambios"
+# Imposible de revisar, imposible de revertir parcialmente
+
+# BIEN: commits atómicos
+git add src/auth/login.js
+git commit -m "feat: agrega validación de email en login"
+git add src/auth/register.js
+git commit -m "feat: agrega validación de email en registro"
+```
+
+**2. Trabajar directamente en main**
+```bash
+# MAL
+git switch main
+# ... hacer cambios durante 3 días ...
+git push
+# Acabas de romper main para todos
+
+# BIEN
+git switch -c feature/mi-cambio
+# ... trabajar tranquilo en tu rama ...
+```
+
+**3. No hacer pull antes de empezar a trabajar**
+```bash
+# MAL: empezar a trabajar sin actualizar
+git switch -c feature/nueva
+# Tu rama está basada en un main desactualizado
+# Vas a tener conflictos innecesarios
+
+# BIEN: siempre actualizar primero
+git switch main
+git pull
+git switch -c feature/nueva
+# Ahora tu rama está basada en la versión más reciente
+```
+
+**4. Acumular ramas que ya se mergearon**
+```bash
+# MAL: nunca limpiar
+git branch
+# feature/login
+# feature/header
+# feature/footer-v1
+# feature/footer-v2
+# fix/bug-viejo
+# ... 30 ramas más que ya se mergearon
+
+# BIEN: limpiar después de cada merge
+git branch -d feature/mi-rama-mergeada
+# O limpiar todas las ramas mergeadas de una vez
+git branch --merged main | grep -v main | xargs git branch -d
+```
+
+**5. Force push a main**
+```bash
+# NUNCA hagas esto
+git push --force origin main
+# Esto REESCRIBE el historial compartido
+# Todos los miembros del equipo van a tener problemas
+
+# Force push a TU rama está OK (con cuidado)
+git push --force origin feature/mi-rama
+# Esto está bien si solo tú trabajas en esa rama
+```
+
+<Callout type="warning" title="¿Se puede deshacer un force push a main?">
+  Técnicamente sí, con `git reflog` en el servidor. Pero en la práctica, es un incendio. Cada miembro del equipo va a tener conflictos, referencias rotas y confusión. **La regla es simple: nunca force push a ramas compartidas.**
+</Callout>
+
+---
+
+### Fork vs Clone / Merge vs Rebase vs Squash
+
+Dos preguntas frecuentes cuando empiezas a trabajar en equipo: ¿cuándo hago fork y cuándo clone? ¿Cuándo hago merge, rebase o squash?
+
+**Fork vs Clone:**
+
+| | Fork | Clone |
+|---|------|-------|
+| **Qué hace** | Crea una copia del repo en **tu** cuenta de GitHub | Descarga el repo a tu computador |
+| **Cuándo usarlo** | Contribuir a un proyecto **ajeno** (open source) | Trabajar en un proyecto **de tu equipo** |
+| **Permisos** | No necesitas permisos del repo original | Necesitas acceso al repo |
+| **Flujo** | Fork → Clone → Branch → Push → PR al repo original | Clone → Branch → Push → PR en el mismo repo |
+
+```bash
+# FORK: para contribuir a un proyecto que no es tuyo
+# 1. Haz fork en GitHub (botón "Fork")
+# 2. Clona TU fork
+git clone https://github.com/TU-USUARIO/proyecto-ajeno.git
+# 3. Trabaja, push a tu fork, crea PR al repo original
+
+# CLONE: para trabajar en tu equipo
+git clone https://github.com/MI-EQUIPO/nuestro-proyecto.git
+# Trabajas directamente, push al mismo repo
+```
+
+**Merge vs Rebase vs Squash:**
+
+| | Merge commit | Rebase | Squash merge |
+|---|-------------|--------|-------------|
+| **Historial** | Conserva todo + commit de merge | Lineal, re-aplica commits | Un solo commit limpio |
+| **Commits originales** | Se mantienen todos | Se re-escriben | Se combinan en uno |
+| **Cuándo usarlo** | Cuando el historial detallado importa | Cuando quieres historial lineal limpio | Cuando la rama tiene commits "WIP" |
+| **Riesgo** | Historial puede ser difícil de leer | Puede causar conflictos si se usa mal | Se pierde el detalle de commits individuales |
+
+<Callout type="tip" title="Guía rápida de decisión">
+  **¿En qué tipo de proyecto estás?**
+
+  - **Proyecto open source ajeno** → Fork + PR
+  - **Proyecto de tu equipo** → Clone + ramas + PR
+  - **Proyecto personal** → Clone + push directo a main (está bien para proyectos pequeños)
+
+  **¿Cómo mergear tu PR?**
+
+  - **Tu rama tiene commits limpios y bien escritos** → Merge commit o rebase
+  - **Tu rama tiene commits WIP, typos, "ahora sí"** → Squash merge
+  - **No sabes cuál elegir** → Squash merge (es la opción más segura)
+</Callout>
+
+---
+
+### Extra: AGENTS.md — tus convenciones para agentes de IA
+
+En el [Módulo 9](#modulo-9) aprendiste a usar agentes de IA como Claude Code o Gemini CLI en la terminal. Cuando trabajas con estos agentes en un proyecto de equipo, surge un problema: **el agente no conoce las convenciones de tu equipo**. Puede hacer commits con mensajes en inglés cuando tu equipo los escribe en español, o hacer push directo a `main` cuando tu equipo usa PRs.
+
+La solución es un archivo `AGENTS.md` (o `CLAUDE.md`, dependiendo del agente) en la raíz de tu repositorio. Este archivo le dice al agente de IA las reglas del proyecto, exactamente igual que el PR template le dice a un humano cómo crear un PR.
+
+Piénsalo así: el PR template es la "guía para humanos" y `AGENTS.md` es la "guía para IAs".
+
+**¿Qué poner en un AGENTS.md?**
+
+Las mismas convenciones que le explicarías a un nuevo miembro del equipo:
+
+```markdown title="AGENTS.md"
+# AGENTS.md
+
+## Flujo de trabajo Git
+
+Este equipo usa el flujo Feature Branch + Squash Merge.
+
+### Reglas de Git
+- Nunca hacer commit directo a main
+- Crear ramas con formato: tipo/descripcion-corta
+  - Tipos: feature/, fix/, docs/, refactor/
+- Mensajes de commit en español, imperativo, una línea
+  - Ejemplo: "Agregar filtro por región al dashboard"
+- Antes de hacer push, verificar que el código corre sin errores
+
+### Pull Requests
+- Todo merge a main pasa por PR
+- Usar squash merge
+- Descripción del PR debe incluir: qué hace, por qué, cómo probarlo
+- Borrar la rama después del merge
+
+### Resolución de conflictos
+- Al resolver conflictos, explicar qué versión se eligió y por qué
+- No resolver conflictos automáticamente sin que el usuario entienda qué cambió
+- Si el conflicto es ambiguo, mostrar ambas versiones y preguntar
+
+### Convenciones del equipo
+- Idioma: español para documentación, inglés para código
+- Los nombres de variables y funciones en inglés
+  (snake_case para R, snake_case para Python)
+- Los comentarios en el código pueden ser en español
+```
+
+```bash
+# Agregar al proyecto
+git add AGENTS.md
+git commit -m "docs: agrega AGENTS.md con convenciones para agentes IA"
+git push
+```
+
+**¿Cómo funciona?**
+
+Cuando inicias un agente de IA en tu proyecto, este lee automáticamente el archivo `AGENTS.md` (o `CLAUDE.md` en el caso de Claude Code) y sigue las instrucciones. Así:
+
+```bash
+cd mi-proyecto
+claude
+# Claude Code lee CLAUDE.md automáticamente
+
+> Haz commit de mis cambios
+# Sin CLAUDE.md: "Update files" (genérico, en inglés)
+# Con CLAUDE.md: "Agregar filtro por región al dashboard" (sigue las convenciones)
+
+> Crea un PR con estos cambios
+# Sin CLAUDE.md: push directo a main
+# Con CLAUDE.md: crea rama feature/, push, crea PR con descripción
+```
+
+<Callout type="tip" title="Cada agente tiene su archivo">
+  - **Claude Code** lee `CLAUDE.md`
+  - **Gemini CLI** lee `GEMINI.md`
+  - **Formato genérico** que varios agentes reconocen: `AGENTS.md`
+
+  Puedes tener los tres archivos en tu proyecto, o simplemente crear `CLAUDE.md` si tu equipo usa Claude Code. El contenido es el mismo — las convenciones de tu equipo escritas en lenguaje natural.
+</Callout>
+
+**¿Qué incluir según tu proyecto?**
+
+| Sección | Qué poner | Ejemplo |
+|---------|-----------|---------|
+| Flujo de Git | Cómo hacer commits, ramas, PRs | "Usar squash merge, ramas con prefijo tipo/" |
+| Idioma | En qué idioma escribir commits, docs, código | "Commits en español, código en inglés" |
+| Estilo de código | Convenciones de formato y naming | "snake_case para Python, camelCase para JS" |
+| Testing | Cómo correr y escribir tests | "Correr `npm test` antes de hacer commit" |
+| Restricciones | Qué NO hacer | "Nunca force push a main" |
+
+<Callout type="info" title="AGENTS.md es documentación viva">
+  Al igual que el README, el archivo `AGENTS.md` debería evolucionar con tu proyecto. Cuando el equipo adopte una nueva convención, agrégala al archivo. Así, tanto humanos como agentes de IA siguen las mismas reglas — y el código se mantiene consistente.
+</Callout>
+
+---
+
+### Tabla resumen de comandos
+
+<CommandTable commands={[
+  { command: "git switch -c feature/nombre", description: "Crear rama con convención de nombre" },
+  { command: "git commit -m \"feat: descripción\"", description: "Commit con Conventional Commits" },
+  { command: "git push -u origin feature/nombre", description: "Subir rama al remoto" },
+  { command: "gh pr create --title \"...\" --body \"...\"", description: "Crear PR desde la terminal" },
+  { command: "gh pr merge --squash", description: "Mergear PR con squash" },
+  { command: "git branch --merged main | grep -v main | xargs git branch -d", description: "Eliminar ramas ya mergeadas" },
+  { command: "git switch main && git pull", description: "Actualizar main antes de crear rama nueva" },
+  { command: "mkdir -p .github", description: "Crear carpeta para PR template" },
+]} />
+
+---
+
+### Ejercicios del módulo
+
+**Ejercicio 1:** Crea un repositorio siguiendo todas las convenciones:
+
+```bash
+mkdir proyecto-equipo-10 && cd proyecto-equipo-10
+git init
+echo "# Proyecto con convenciones" > README.md
+git add . && git commit -m "chore: inicializa proyecto"
+
+# Crea un PR template
+mkdir -p .github
+cat > .github/pull_request_template.md << 'EOF'
+## ¿Qué hace este PR?
+
+## Tipo de cambio
+- [ ] Feature
+- [ ] Fix
+- [ ] Docs
+
+## ¿Cómo se probó?
+
+EOF
+
+git add . && git commit -m "chore: agrega template de Pull Request"
+```
+
+**Ejercicio 2:** Practica el flujo de ramas con convenciones:
+
+```bash
+# Crea una rama con nombre correcto
+git switch -c feature/agregar-estilos
+
+# Haz commits con Conventional Commits
+echo "body { margin: 0; }" > estilos.css
+git add . && git commit -m "feat: agrega estilos base del proyecto"
+
+echo "h1 { color: blue; }" >> estilos.css
+git add . && git commit -m "feat: agrega estilo para títulos"
+
+# Vuelve a main
+git switch main
+```
+
+**Ejercicio 3:** Simula el flujo completo de equipo (si tienes un repo en GitHub):
+
+```bash
+# Sube el proyecto
+gh repo create proyecto-equipo-10 --public --source=. --push
+
+# Configura branch protection en Settings → Branches → Add rule
+# Activa "Require a pull request before merging"
+
+# Intenta push directo a main (debería fallar)
+echo "cambio directo" >> README.md
+git add . && git commit -m "test: push directo"
+git push
+# ❌ Debería fallar
+
+# Hazlo correctamente via PR
+git switch -c fix/actualizar-readme
+git push -u origin fix/actualizar-readme
+gh pr create --title "fix: actualiza README" --body "Cambio hecho correctamente via PR"
+gh pr merge --squash
+git switch main && git pull
+```
+
+**Ejercicio 4:** Limpia ramas mergeadas:
+
+```bash
+# Ver todas las ramas
+git branch
+
+# Eliminar ramas que ya se mergearon
+git branch --merged main | grep -v main | xargs git branch -d
+
+# Verificar que solo queda main
+git branch
+```
+
+<Callout type="info" title="Convenciones = menos fricción">
+  Las convenciones no son reglas arbitrarias — son acuerdos que reducen la confusión y los errores en equipo. Al principio parecen "extra", pero después de un par de semanas las haces automáticamente. Y cuando alguien nuevo se une al equipo, puede entender el proyecto rápido leyendo el historial de commits y las ramas activas.
+</Callout>
