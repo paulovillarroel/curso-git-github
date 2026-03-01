@@ -6,28 +6,36 @@ Curso interactivo para principiantes que cubre desde la configuración inicial h
 
 ## Contenido
 
-El curso está organizado en 8 módulos progresivos, una sección de errores comunes, ejercicios integradores y un cheatsheet de referencia rápida.
+El curso está organizado en 10 módulos progresivos agrupados en 3 niveles, más secciones de práctica y referencia.
 
-### Fundamentos
+### Básico
 
 | # | Módulo | Descripción |
 |---|--------|-------------|
-| 01 | Supervivencia en Terminal | `pwd`, `ls`, `cd`, `mkdir`, `touch`, `echo`, `cat` |
+| 01 | Prerequisitos de terminal | `pwd`, `ls`, `cd`, `mkdir`, `touch`, `echo`, `cat` |
 | 02 | Configuración inicial | Qué es Git, instalación, `git config` |
 | 03 | Ciclo de vida local | `git init`, `status`, `add`, `diff`, `commit`, `log`, `.gitignore` |
-| 04 | Viajes en el tiempo | `git switch --detach`, `revert`, `reset --soft`, `reset --hard` |
-| 05 | Ramas (universos paralelos) | `git branch`, `switch -c`, `merge`, conflictos, `branch -d` |
-| 06 | GitHub (la nube) | `remote`, `push`, `pull`, `clone`, `fork`, autenticación |
+| 04 | GitHub (la nube) | `remote`, `push`, `pull`, `clone`, `fork`, autenticación |
+
+### Intermedio
+
+| # | Módulo | Descripción |
+|---|--------|-------------|
+| 05 | Viajes en el tiempo | `git switch --detach`, `revert`, `reset --soft`, `reset --hard` |
+| 06 | Ramas (universos paralelos) | `git branch`, `switch -c`, `merge`, conflictos, `branch -d` |
+| 07 | Flujo profesional | GitHub Flow, Pull Requests, code review, merge en GitHub |
 
 ### Avanzado
 
 | # | Módulo | Descripción |
 |---|--------|-------------|
-| 07 | Flujo profesional | GitHub Flow, Pull Requests, code review, merge en GitHub |
-| 08 | GitHub CLI y agentes IA | `gh` CLI, Claude Code, Gemini CLI, GitHub Copilot CLI |
+| 08 | Técnicas avanzadas | `rebase`, `pull --rebase`, `stash`, limpieza de ramas |
+| 09 | Agentes IA (bonus) | Claude Code, Gemini CLI, GitHub Copilot CLI como asistentes de Git |
+| 10 | Git para equipos | Branch protection, PR templates, `AGENTS.md`, anti-patrones |
 
 ### Práctica y referencia
 
+- **Rutinas diarias** — Hábitos para mantener repositorios sanos
 - **Errores comunes** — Soluciones paso a paso a los 10 errores más frecuentes
 - **Ejercicios integradores** — 5 ejercicios que combinan todos los conceptos
 - **Cheatsheet** — Referencia rápida de todos los comandos
