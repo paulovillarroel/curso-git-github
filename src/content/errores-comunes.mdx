@@ -177,6 +177,45 @@ git restore archivo.txt
 
 ---
 
+### "Quiero descartar TODOS los cambios locales y quedar igual al remoto"
+
+A veces te fuiste por un camino que no funcionó y quieres empezar de cero con lo que hay en GitHub, sin conservar nada local.
+
+**Si solo tienes archivos modificados (sin archivos nuevos):**
+
+```bash
+# Descartar todos los cambios en archivos tracked
+git restore .
+
+# Actualizar con lo último del remoto
+git pull
+```
+
+`git restore .` descarta **todos** los cambios no commiteados de golpe. Es el equivalente a hacer `git restore archivo.txt` para cada archivo modificado.
+
+**Si además creaste archivos nuevos que quieres borrar:**
+
+```bash
+# Descartar cambios en archivos tracked
+git restore .
+
+# Borrar archivos y carpetas no rastreados por Git
+git clean -fd
+
+# Actualizar
+git pull
+```
+
+<Callout type="warning" title="Esto borra todo sin preguntar">
+  `git restore .` y `git clean -fd` no piden confirmación. Si tenías cambios que querías conservar, se pierden. Siempre haz `git status` primero para verificar qué vas a descartar.
+</Callout>
+
+<Callout type="tip" title="¿Solo quieres ver qué se borraría?">
+  Usa `git clean -n` (dry run) para ver qué archivos se eliminarían, sin borrar nada.
+</Callout>
+
+---
+
 ### "Hice git add de un archivo que no debía"
 
 Agregaste un archivo al staging por error (quizás un `.env` con contraseñas o un archivo temporal):
@@ -311,6 +350,8 @@ git restore --source=abc1234 ruta/al/archivo.txt
   { command: "git reset --soft HEAD~1", description: "Deshacer último commit (archivos quedan en staging)" },
   { command: "git reset --keep HEAD~3", description: "Mover rama N commits atrás (conservando archivos)" },
   { command: "git restore archivo.txt", description: "Descartar cambios no commiteados en un archivo" },
+  { command: "git restore .", description: "Descartar TODOS los cambios no commiteados" },
+  { command: "git clean -fd", description: "Borrar archivos y carpetas no rastreados" },
   { command: "git restore --staged archivo.txt", description: "Sacar un archivo del staging" },
   { command: "git rm --cached archivo.txt", description: "Dejar de rastrear un archivo (sin borrarlo)" },
   { command: "git merge --abort", description: "Cancelar un merge en progreso" },

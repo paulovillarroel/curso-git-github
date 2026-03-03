@@ -66,6 +66,7 @@ git push                # 4. Subir a GitHub
 | `git commit -m "mensaje"` | Guardar snapshot |
 | `git restore --staged archivo.txt` | Sacar del staging (sin perder cambios) |
 | `git restore archivo.txt` | Descartar cambios no commiteados |
+| `git restore .` | Descartar TODOS los cambios no commiteados |
 
 ---
 
@@ -111,7 +112,8 @@ git push                # 4. Subir a GitHub
 | Comando | Qué hace |
 |---------|----------|
 | `git merge --abort` | Cancelar un merge con conflictos |
-| `git restore archivo.txt` | Descartar cambios en un archivo |
+| `git restore .` | Descartar todos los cambios locales |
+| `git clean -fd` | Borrar archivos/carpetas no rastreados |
 | `git rm --cached archivo.txt` | Dejar de rastrear sin borrar |
 | `git show HEAD~3:archivo.txt` | Ver archivo en un commit pasado |
 | `git stash` | Guardar cambios temporalmente |
