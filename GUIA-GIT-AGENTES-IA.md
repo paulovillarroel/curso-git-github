@@ -516,4 +516,4 @@ Ejemplo:
 
 ---
 
-> **Nota:** Esta guía fue creada como material complementario del [Curso de Git y GitHub](https://curso-git-github.com). Para aprender estos conceptos paso a paso, revisa el curso completo.
+> **Nota:** Esta guía fue creada como material complementario del [Curso de Git y GitHub](https://paulovillarroel.github.io/curso-git-github/). Para aprender estos conceptos paso a paso, revisa el curso completo.
